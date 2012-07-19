@@ -23,8 +23,8 @@ class DoitDB:
 
     def __init__(self, dbname):
         if self.conn is None:
-            self.conn = psycopg2.connect(database=dbname, user='django',
-                                         password='django', host='localhost')
+            self.conn = psycopg2.connect(database=dbname, user='apagan',
+                                         password='12345', host='localhost')
 
     def sources(self):
         cur = self.conn.cursor()
