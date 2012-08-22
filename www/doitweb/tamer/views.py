@@ -7,7 +7,7 @@ from operator import itemgetter, attrgetter
 from django.shortcuts import render_to_response
 from django.http import HttpResponse, HttpResponseRedirect
 from django.utils import simplejson
-
+import settings
 
 source_schema = 'golf'
 
@@ -295,7 +295,7 @@ def schema_map_source(req, dbname, sid):
     db = TamerDB(dbname)
     db.rebuild_schema_mapping_models()
     db.schema_map_source(sid)
-    redirect_url = '/doit/' + dbname + '/sources/' + sid + '/map'
+    redirect_url = '%s/import/schema-map/questions' % settings.EXPERTSRC_URL
     return HttpResponse(simplejson.dumps({'redirect': redirect_url}),
                         mimetype='application/json')
 

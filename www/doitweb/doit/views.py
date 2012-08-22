@@ -6,6 +6,7 @@ from operator import itemgetter, attrgetter
 from django.shortcuts import render_to_response
 from django.http import HttpResponse
 from django.utils import simplejson
+import settings
 
 def source_index(req, dbname):
 	db = DoitDB(dbname)
@@ -46,6 +47,47 @@ def mapper_by_field_name(req, dbname, field_name, comp_op):
     return render_to_response('doit/mapper.html', {
         'attr_list': field_mappings.values(), 'field_name': field_name,
         'meta': meta,})
+
+def mapper_by_field_set(req, dbname):
+	db = DoitDB(dbname)
+	meta = dict()
+	context = dict()
+	is_review = 'is_review' in req.GET
+	category_string = ''
+	id_list = []
+	answers = dict()
+	if is_review:
+		reviewer_id = req.GET.get('reviewer_id')
+		category_string = 'Reviewer %s' % reviewer_id 
+		question_info = req.GET.get('question_info')
+		for info in question_info.split(','):
+			parts = info.split(':')
+			local_id = parts[0]
+			id_list.append(local_id)
+			l = answers.setdefault(local_id, list())
+			l.append({'gid':parts[1], 'is_match':parts[0]})
+	else:
+		answerer_id = req.GET.get('answerer_id')
+		category_string = 'Expert Answerer %s' % answerer_id
+		fields = req.GET['fields']
+		id_list = fields.split(',')
+
+	meta['category'] = category_string 
+
+	field_mappings = db.field_mappings_by_id_list(id_list=id_list, is_review=is_review)
+
+	attr_list = sorted(field_mappings.values(), key=lambda f: f['match']['score'])
+	
+	c = {'attr_list': attr_list,
+	     'expertsrc':True,
+	     'meta': meta, 
+	     'expertsrc_url':settings.EXPERTSRC_URL}
+
+	if is_review:
+		return render_to_response('doit/review.html', c)
+	else:
+		c['answerer_id'] = answerer_id
+		return render_to_response('doit/mapper.html', c)
 
 def viewTable_template(req):
     return render_to_response('doit/viewTable_template.html')
@@ -89,8 +131,9 @@ def mapper_results(req, dbname):
     db = DoitDB(dbname)
     mappings = simplejson.loads(req.POST['mappings'])
     rejects = simplejson.loads(req.POST['rejects'])
-    s = db.create_mappings(mappings)
-    t = db.create_mappings(rejects, anti=True)
+    answerer_id = int(req.POST['answerer_id'])
+    s = db.create_mappings(mappings, answerer_id=answerer_id)
+    t = db.create_mappings(rejects, anti=True, answerer_id=answerer_id)
     return HttpResponse(s)
 
 def suggest_new_attribute_form(req, dbname):

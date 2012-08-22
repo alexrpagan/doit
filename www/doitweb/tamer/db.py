@@ -4,6 +4,9 @@ import cPickle
 import re
 from operator import itemgetter
 
+from protocol import expertsrc_pb2
+from protocol.batchqueue import BatchQueue
+
 # convert float (0 to 1) to 8 bit web color (e.g. 00 to ff)
 def f2c(x):
     if x > 1.0: x = 1.0
@@ -281,6 +284,13 @@ class TamerDB:
         cur.execute(cmd)
         self.conn.commit()
 
+    def dictfetchall(self, cur):
+        desc = cur.description
+        return [
+            dict(zip([col[0] for col in desc], row))
+            for row in cur.fetchall()
+            ]
+
     def schema_map_source(self, sourceid):
         cur = self.conn.cursor()
         cmd = '''SELECT qgrams_results_for_source(%s);
@@ -288,7 +298,92 @@ class TamerDB:
                  SELECT mdl_results_for_source(%s);
                  SELECT nr_composite_load();'''
         cur.execute(cmd, (sourceid, sourceid, sourceid))
+        mappings = self.get_field_mappings_by_source(sourceid)
+        cmd = "SELECT id, name FROM global_attributes"
+        cur.execute(cmd)
+        global_attributes = self.dictfetchall(cur)
+        batch_obj = expertsrc_pb2.QuestionBatch()
+        batch_obj.type = expertsrc_pb2.QuestionBatch.SCHEMAMAP
+        batch_obj.asker_name = 'data-tamer'
+        cmd = "SELECT local_id from local_sources where id = %s"
+        cur.execute(cmd, (sourceid,))
+        batch_obj.source_name = cur.fetchone()[0]
+        batch = BatchQueue('question', batch_obj)
+        for fid in mappings.keys():
+            question = batch.getbatchobj().question.add()
+            question.domain_name = 'data-tamer'
+            question.local_field_id = fid
+            question.local_field_name = mappings[fid]['name']
+            choices = mappings[fid]['matches']
+            ids = list()
+            choice_count = 10
+            for c in choices:
+                if choice_count > 0:
+                    choice = question.choice.add()
+                    choice.global_attribute_id = c['id']
+                    choice.global_attribute_name = c['name']
+                    choice.confidence_score = c['score']
+                    ids.append(c['id'])
+                    choice_count -= 1
+            # id_set = set(ids)
+            # for a in global_attributes:
+            #     if a['id'] not in id_set:
+            #         choice = question.choice.add()
+            #         choice.global_attribute_id = a['id']
+            #         choice.global_attribute_name = a['name']
+        batch.enqueue()
         self.conn.commit()
+
+    def get_field_mappings_by_source(self, source_id):
+        """ Retrieves all possible mappings for all fields in a source."""
+        cur = self.conn.cursor()
+        fields = dict()
+        cmd = '''SELECT lf.id, lf.local_name, ama.global_id, ga.name,
+                        ama.who_created
+                   FROM local_fields lf
+              LEFT JOIN attribute_mappings ama
+                     ON lf.id = ama.local_id
+              LEFT JOIN global_attributes ga
+                     ON ama.global_id = ga.id
+                  WHERE lf.source_id = %s;'''
+        cur.execute(cmd, (source_id,))
+        
+        for rec in cur.fetchall():
+            fid, fname, gid, gname, who = rec
+            fields.setdefault(fid, {'id': fid, 'name': fname})
+            if gid is not None:
+                fields[fid]['match'] = {
+                    'id': gid, 'name': gname, 'who_mapped': who,
+                    'is_mapping': True, 'score': 2.0}
+
+        cmd = '''SELECT lf.id, lf.local_name, nnr.match_id, ga.name, nnr.score
+                   FROM nr_ncomp_results_tbl nnr, local_fields lf,
+                        global_attributes ga
+                  WHERE nnr.field_id = lf.id
+                    AND nnr.source_id = %s
+                    AND nnr.match_id = ga.id
+                    AND (lf.n_values > 0 OR 1 = 1)
+               ORDER BY score desc;'''
+
+        cur.execute(cmd, (source_id,))
+        records = cur.fetchall()
+
+        for rec in records:
+            fid, fname, gid, gname, score = rec
+            fields[fid].setdefault('match', {
+                'id': gid, 'name': gname, 'score': score,
+                'green': f2c(score / 1.0), 'red':f2c(1.0 - score / 2.0)})
+
+            matches = fields[fid].setdefault('matches', list())
+            matches.append({'id':gid, 'name':gname, 'score':score,
+                            'green': f2c(score / 1.0), 'red':f2c(1.0 - score / 2.0)})
+
+        for fid in fields:
+            if 'match' not in fields[fid]:
+                fields[fid]['match'] = {'id': 0, 'name': 'Unknown', 'score': 0, 'green': f2c(0), 'red': f2c(1)}
+                fields[fid]['matches'] = list()
+
+        return fields
 
     def dedup_source(self, sid):
         cur = self.conn.cursor()

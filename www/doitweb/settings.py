@@ -100,3 +100,5 @@ INSTALLED_APPS = (
 STATIC_URL = '/static/'
 
 STATICFILES_DIRS = ('/home/apagan/doit/www/static',)
+
+EXPERTSRC_URL = 'http://modis.csail.mit.edu:8888'

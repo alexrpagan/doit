@@ -24,6 +24,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 {% block title %}Attribute Mapper{% endblock title %}
 
 {% block content %}
+  <input id="answerer_id" type="hidden" value="{{answerer_id}}">
+
   <div class="pane top">
     <table style="width:100%;">
       <tr>
@@ -34,6 +36,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
           <span class="control reset">Reset</span>
           <!--<span class="button">Wrangle</span>-->
           <span class="control save">Save</span>
+	  {% if expertsrc_url %}
+	  <span class="control back"><a id="expertsrc_link" style="text-decoration:none;" href="{{expertsrc_url}}/import/schema-map/answers">Back to Expertsrc</a></span>
+          {% endif %}
         </td>
       </tr>
     </table>

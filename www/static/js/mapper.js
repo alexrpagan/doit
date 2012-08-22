@@ -263,7 +263,8 @@ $(reset_buttons).each( function () {
 var $saveButton = $('.control.save', topPane),
     $resetButton = $('.control.reset', topPane),
     $mapallButton = $('.control.mapall', topPane),
-    $viewTableButton = $('.control.viewTable-button', topPane);
+    $viewTableButton = $('.control.viewTable-button', topPane),
+    $backButton = $('.control.back', topPane);
 
 $resetButton.click(function () {
     $(reset_buttons).click();
@@ -274,7 +275,8 @@ $mapallButton.click(function () {
 });
 
 $saveButton.click(function () {
-    var mappings = [],
+    var answerer_id = 0,
+        mappings = [],
         rejected = [];
     $('.new-mapping', matchers).each(function () {
 	mappings.push($(this).attr('id').split('-is-'));
@@ -282,10 +284,12 @@ $saveButton.click(function () {
     $('.rejected', matchers).each(function () {
 	rejected.push($(this).attr('id').split('-to-'));
     });
+    answerer_id = $('input#answerer_id').val();
     if (mappings.length + rejected.length) {
         var url = basePath + 'save',
             data = 'mappings=' + JSON.stringify(mappings) +
-                   '&rejects=' + JSON.stringify(rejected),
+                   '&rejects=' + JSON.stringify(rejected) +
+	           '&answerer_id=' + answerer_id,
             callback = function (d) {
                 $('.new-mapping')
                     .removeClass('new-mapping')
@@ -316,7 +320,6 @@ $viewTableButton.click(function () {
         $table.show();
     }
 });
-
 
 /* detailed views */
 var detail_buttons = $('.detail', actions);

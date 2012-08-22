@@ -3,6 +3,9 @@ import copy
 import cPickle
 from operator import itemgetter
 
+from protocol import expertsrc_pb2
+from protocol.batchqueue import BatchQueue
+
 # convert float (0 to 1) to 8 bit web color (e.g. 00 to ff)
 def f2c(x):
     if x > 1.0: x = 1.0
@@ -134,11 +137,14 @@ class DoitDB:
 	metadata.insert(0, {'name': 'Name', 'value': rec[1]})
 	return metadata
 
-    def create_mappings(self, pairs, anti=False):
+    def create_mappings(self, pairs, anti=False, answerer_id=0):
         if len(pairs) == 0:
             return
         cur = self.conn.cursor()
 	params = []
+        batch_obj = expertsrc_pb2.AnswerBatch()
+        batch_obj.type = expertsrc_pb2.AnswerBatch.SCHEMAMAP
+        batch = BatchQueue('answer', batch_obj)
 	cmd = 'INSERT INTO attribute_mappings (' \
               '    local_id, global_id, confidence, authority, who_created, ' \
               '    when_created, why_created) ' \
@@ -150,6 +156,15 @@ class DoitDB:
 	    params.append(global_id)
 	    params.append('WEB')
 	    params.append('WEB')
+            # register answers with expertsrc
+            answer = batch.getbatchobj().answer.add()
+            answer.answerer_id = answerer_id 
+            answer.confidence = 1.0
+            answer.authority = 0.5
+            answer.global_attribute_id = int(global_id)
+            answer.local_field_id = int(local_id)
+            answer.is_match = not anti
+        batch.enqueue()
 	cmd = cmd[0:-2] + ';'
 	cur.execute(cmd, params)
 	self.conn.commit()
@@ -302,6 +317,51 @@ class DoitDB:
                     'id': rec[2], 'name': rec[3], 'score': rec[4],
                     'green': f2c(rec[4] / 2.0), 'red':f2c(1.0 - rec[4] / 3.0)}}
         return fields
+
+    def field_mappings_by_id_list(self, id_list, is_review=False, matches=None):
+        import logging
+        cur = self.conn.cursor()
+        fields = dict()
+        cmd = '''SELECT lf.id, lf.local_name, ama.global_id, ga.name,
+                        ama.who_created
+                   FROM local_fields lf
+              LEFT JOIN attribute_mappings ama
+                     ON lf.id = ama.local_id
+              LEFT JOIN global_attributes ga
+                     ON ama.global_id = ga.id
+                  WHERE lf.id in (%s);''' % ','.join(id_list) #TODO: sanitize these input
+        cur.execute(cmd)
+        
+        for rec in cur.fetchall():
+            fid, fname, gid, gname, who = rec
+            fields.setdefault(fid, {'id': fid, 'name': fname})
+            # if gid is not None:
+            #     fields[fid]['match'] = {
+            #         'id': gid, 'name': gname, 'who_mapped': who,
+            #         'is_mapping': True, 'score': 2.0}
+
+        cmd = '''SELECT lf.id, lf.local_name, nnr.match_id, ga.name, nnr.score
+                   FROM nr_ncomp_results_tbl nnr, local_fields lf,
+                        global_attributes ga
+                  WHERE nnr.field_id = lf.id
+                    AND lf.id in (%s)
+                    AND nnr.match_id = ga.id
+                    AND (lf.n_values > 0 OR 1 = 1)
+               ORDER BY score desc;''' % ','.join(id_list)
+
+        cur.execute(cmd)
+        records = cur.fetchall()
+
+        for rec in records:
+            fid, fname, gid, gname, score = rec
+            fields[fid].setdefault('match', {
+                'id': gid, 'name': gname, 'score': score,
+                'green': f2c(score / 1.0), 'red':f2c(1.0 - score / 2.0)})
+        for fid in fields:
+            if 'match' not in fields[fid]:
+                fields[fid]['match'] = {'id': 0, 'name': 'Unknown', 'score': 0, 'green': f2c(0), 'red': f2c(1)}
+        return fields
+    
 
     def lowscorers(self, n):
         pass
