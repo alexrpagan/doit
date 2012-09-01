@@ -1,0 +1,11 @@
+<div class="source-meta">
+  <table>
+    <tr><th colspan=2 class="header-rounded lead">Source Metadata</th></tr>
+    {% for meta in meta.data %}
+    <tr class="{% cycle '' 'alt' %}">
+      <th>{{ meta.name }}</th>
+      <td title="{{ meta.value }}">{{ meta.value|truncatewords:6 }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+</div>

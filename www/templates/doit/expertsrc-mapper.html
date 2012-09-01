@@ -1,0 +1,215 @@
+{% extends "expertsrc-base.html" %}
+
+{% comment %}
+Copyright (c) 2011 Massachusetts Institute of Technology
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+{% endcomment %}
+
+{% block title %}Attribute Mapper{% endblock title %}
+
+
+{% block styles %}
+<link rel="stylesheet" href="/static/styles/base/jquery.ui.all.css" type="text/css" media="screen"/>
+{% endblock styles %}
+
+
+{% block content %}
+<!-- <div class="row"> -->
+<!--   <div class="jumbotron"> -->
+<!--     <div class="container"> -->
+<!--       <div class="page-header"> -->
+<!-- 	<h1>Answer Questions</h1> -->
+<!--       </div> -->
+<!--     </div> -->
+<!--   </div>  -->
+<!-- </div> -->
+
+  <input id="answerer_id" type="hidden" value="{{answerer_id}}">
+
+  <div class="pane top well">
+    <table style="width:100%;">
+      <tr>
+        <td class="title">
+	  <div class="current-source lead hide">
+	  </div>
+	</td>
+        <td>
+	  <div class="controls btn-toolbar pull-right">
+	    <span class="toggle-data-panel pull-left btn btn-large hide"></span>
+	    <div class="btn-group">
+	      <span class="btn control help-btn">Help</span>
+              <!-- <span class="btn control mapall">Accept All</span>-->
+              <span class="btn control reset">Reset</span>
+              <!--<span class="button">Wrangle</span>-->
+              <span class="btn control save">Save</span>
+	      {% if expertsrc_url %}
+	      <span class="btn control back">Done</span>
+              {% endif %}
+	    </div>
+	  </div>
+        </td>
+      </tr>
+    </table>
+  </div>
+  <div class="pane left hide">
+    <div class="source-meta">
+    </div>
+  </div>
+  {% if attr_list %}
+  <div class="pane right">
+    <div class="viewTable">
+      
+    </div>
+    <table class="table mapper">
+	<tr>
+	  <th class="attr header-left lead">Data Attribute</th>
+	  <th class="match header lead">Suggested Matches</th>
+	  <th class="actions header lead">Actions</th>
+	  <th class="status header-right lead">Status</th>
+	</tr>
+      <tbody>
+	<tr>
+	  <td class="attr help">
+	    <p>
+	      This is an unmapped data field. For more information about the field and its matches, press the <i class="icon-search icon-info"></i> button.
+	    </p>
+	    <p>
+	      For more information about the field's data source, press the <i class="icon-search icon-eye-open"></i> button.
+	    </p>
+	    <br />
+	    <a href="#" class="btn btn-mini pull-left">Hide help <i class="icon-search icon-minus"></i></a>
+	  </td>
+	  <td class="match help">
+	    <p>
+	      These are global attributes that we've generated as possible matches for the data attributes (left).
+	      The colored field at left indicates our confidence that the pair is a valid match. More candidates are available in the dropdown at right.
+	    </p>
+	  </td>
+	  <td class="actions help">
+	    <p>
+	      <i class="icon-search icon-ok"></i> - The match is <b>correct</b>.
+	    </p>
+	    <p>
+	      <i class="icon-search icon-remove"></i> - The match is <b>incorrect</b>.
+	    </p>
+	    <p>
+	      <i class="icon-search icon-info"></i> - More info about the match.
+	    </p>
+	  </td>
+	  <td class="status help">
+	    This column indicates whether the field has been mapped. Unsaved changes are show in <i>italics</i>. Committed changes are <b>bolded</b>.
+	  </td>
+	</tr>
+      {% for attr in attr_list %}
+      <tr id="fid{{ attr.id }}" class="mapper-row {% if not attr.match.is_mapping %}un{% endif %}mapped {% cycle '' 'alt' %}">
+	<td class="attr lead" >
+	  <div class="row" style="margin-left:25px;">
+	    <div class="tooltip-container viewsource-btn-box">
+	      <span class="viewsource pull-left btn btn-mini" rel="tooltip" title="{{attr.source_name}}" data-source-id="{{attr.sid}}" data-source-name="{{attr.source_name}}"><i class="icon-search icon-eye-open"></i></span>
+	    </div>
+	    <div class="tooltip-container example">
+	      <span class="pull-left" rel="tooltip" style="margin-left:25px;"> {{ attr.name }} </span>
+	    </div>
+	  </div>
+	</td>
+	<td class="match">
+            <table class="match-table table-condensed pull-right">
+              <tr>
+                <td>
+                  {% if attr.match.is_mapping %}
+                  <div class="choice mapping" id="{{ attr.id }}-is-{{ attr.match.id }}">
+                    {{ attr.match.name }}
+                  </div>
+                  {% else %}
+	    	  <div class="tooltip-container score">
+                    <div class="choice" rel="tooltip" id="{{ attr.id }}-is-{{ attr.match.id }}"
+	    		 title="Score: {{ attr.match.score|floatformat }} out of 4.0"
+	    		 style="border-left-color:#{{ attr.match.red }}{{ attr.match.green }}44;">
+                      {{ attr.match.name }}
+                    </div>
+	    	  </div>
+	    	  {% endif %}
+                  <div class="map-list-container hide">
+                    <div class="filter"><input type="text" placeholder="Filter..."></input></div>
+                    <ul class="map-list"></ul>
+                    <!--<div class="suggest"><a>Suggest new...</a></div>-->
+                  </div>
+                </td>
+	    	<td class="pull-left">
+	    	  <span class="btn button {% if attr.match.is_mapping %} disabled{% endif %}"><i class="icon-search icon-chevron-down"></i></span>
+	    	</td>
+              </tr>
+            </table>
+	 </td>
+         <td class="actions">
+	   <span class="btn-toolbar">
+	     <span class="btn-group per-row-actions">
+	       <span class="btn accept"><i class="icon-search icon-ok"></i></span>
+	       <span class="btn reject"><i class="icon-search icon-remove"></i></span>
+	       <span class="btn reset">Reset</span>
+	       <span class="btn detail"><i class="icon-search icon-info"></i></span>
+	     </span>
+	   </span>
+	</td>
+        {% if not attr.match.is_mapping %}
+ 	<td class="status">unmapped</td>
+        {% else %}
+        <td class="status" title="Mapped by {{ attr.match.who_mapped }}">mapped</td>
+        {% endif %}
+     </tr>
+      <tr class="confidence well hide">
+	<td></td>
+	<td></td>
+	<td class="actions">
+	  <p><small>How confident are you that you are correct?</small></p>
+          <div class="confidence-slider" data-confidence=""></div>
+	</td>
+	<td><a href="#" class="btn btn-large done-with-confidence">OK</a></td>
+      </tr>
+
+      {% endfor %}
+      <tbody>
+    </table>
+  </div>
+  <div id="detailModal" class="modal hide fade">
+    <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      <h3>Field Info</h3>
+    </div>
+    <div id="modal-contents" class="modal-body">
+    </div>
+  </div>
+
+  {% else %}
+  <div>Nothing to do!</div>
+  {% endif %}
+
+{% endblock content %}
+
+{% block jquery %}
+  <script type="text/javascript" src="/static/js/jquery.ui.core.min.js"></script>
+  <script type="text/javascript" src="/static/js/jquery.ui.widget.min.js"></script>
+  <script type="text/javascript" src="/static/js/jquery.ui.mouse.min.js"></script>
+  <script type="text/javascript" src="/static/js/jquery.ui.slider.min.js"></script>
+  <script type="text/javascript" src="/static/js/jquery.cookie.js"></script>
+  <script type="text/javascript" src="/static/js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="/static/js/expertsrc-mapper.js"></script>
+{% endblock jquery %}
+
+

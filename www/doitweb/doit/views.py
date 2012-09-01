@@ -48,46 +48,47 @@ def mapper_by_field_name(req, dbname, field_name, comp_op):
         'attr_list': field_mappings.values(), 'field_name': field_name,
         'meta': meta,})
 
+def auth_user(answerer_id, fields):
+	"""
+	Use the user's expertsrc session key, answerer_id, and current id selection
+	to make sure that they're answering the questions they should be.
+
+	If not, redirect them to wherever they are supposed to be.
+	"""
+	return True
+
 def mapper_by_field_set(req, dbname):
 	db = DoitDB(dbname)
-	meta = dict()
-	context = dict()
-	is_review = 'is_review' in req.GET
-	category_string = ''
-	id_list = []
-	answers = dict()
-	if is_review:
-		reviewer_id = req.GET.get('reviewer_id')
-		category_string = 'Reviewer %s' % reviewer_id 
-		question_info = req.GET.get('question_info')
-		for info in question_info.split(','):
-			parts = info.split(':')
-			local_id = parts[0]
-			id_list.append(local_id)
-			l = answers.setdefault(local_id, list())
-			l.append({'gid':parts[1], 'is_match':parts[0]})
-	else:
-		answerer_id = req.GET.get('answerer_id')
-		category_string = 'Expert Answerer %s' % answerer_id
-		fields = req.GET['fields']
-		id_list = fields.split(',')
+	answerer_id = req.GET.get('answerer_id', False)
+	fields = req.GET.get('fields', False)
+	assert all((fields, answerer_id, auth_user(answerer_id, fields),))
 
-	meta['category'] = category_string 
+        # hack to make sure that ids are really ints
+        # this should raise an integer parse error if the ids are
+        # tampered with.
 
-	field_mappings = db.field_mappings_by_id_list(id_list=id_list, is_review=is_review)
+        field_ids = map(int, fields.split(','))
 
-	attr_list = sorted(field_mappings.values(), key=lambda f: f['match']['score'])
-	
+	# TODO: make sure that all ids are ints
+	field_mappings = db.field_mappings_by_id_list(field_ids=field_ids, 
+						      answerer_id=answerer_id)
+
+	attr_list = sorted(field_mappings.values(), key=lambda f: f['match']['score'], reverse=True)
+#	attr_list = sorted(attr_list, key=lambda f: f['sid'])
+
 	c = {'attr_list': attr_list,
 	     'expertsrc':True,
-	     'meta': meta, 
-	     'expertsrc_url':settings.EXPERTSRC_URL}
+	     'expertsrc_url':settings.EXPERTSRC_URL,
+	     'answerer_id': answerer_id }
 
-	if is_review:
-		return render_to_response('doit/review.html', c)
-	else:
-		c['answerer_id'] = answerer_id
-		return render_to_response('doit/mapper.html', c)
+	return render_to_response('doit/expertsrc-mapper.html', c)
+
+def source_meta(req, dbname, sid):
+    db = DoitDB(dbname)
+    meta = dict()
+    meta['data'] = db.source_meta(sid)
+    meta['category'] = 'Source %s' % sid
+    return render_to_response('doit/source_meta.html', { 'meta': meta })
 
 def viewTable_template(req):
     return render_to_response('doit/viewTable_template.html')

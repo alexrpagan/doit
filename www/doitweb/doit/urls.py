@@ -7,6 +7,7 @@ urlpatterns = patterns('doit.views',
 
     (r'^(?P<dbname>\w+)/lowscorers/$', 'lowscoremapper'),
     (r'^(?P<dbname>\w+)/sources/(?P<sid>\d+)/map$', 'mapper'),
+    (r'^(?P<dbname>\w+)/sources/(?P<sid>\d+)/meta', 'source_meta'),
     (r'^(?P<dbname>\w+)/sources/(?P<sid>\d+)/data', 'source_data'),
     (r'^(?P<dbname>\w+)/sources/(?P<sid>\d+)/table', 'source_table'),
     (r'^(?P<dbname>\w+)/sources/(?P<sid>\d+)/entities', 'source_entities'),

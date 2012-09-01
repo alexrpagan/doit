@@ -14,7 +14,6 @@ return {
 
     /* Methods */
     init: function (sourceId) {
-
         var url = basePath + 'sources/' + sourceId + '/table',
 	    data = {
             },

@@ -24,7 +24,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 {% block title %}Attribute Mapper{% endblock title %}
 
 {% block content %}
-  <input id="answerer_id" type="hidden" value="{{answerer_id}}">
 
   <div class="pane top">
     <table style="width:100%;">
@@ -37,7 +36,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
           <!--<span class="button">Wrangle</span>-->
           <span class="control save">Save</span>
 	  {% if expertsrc_url %}
-	  <span class="control back"><a id="expertsrc_link" style="text-decoration:none;" href="{{expertsrc_url}}/import/schema-map/answers">Back to Expertsrc</a></span>
+	  <span class="control back"><a id="expertsrc_link" style="text-decoration:none;" href="{{expertsrc_url}}/review">Back to Expertsrc</a></span>
           {% endif %}
         </td>
       </tr>
@@ -119,7 +118,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
   <script type="text/javascript" src="/static/js/mapper.js"></script>
   <script type="text/javascript" src="/static/js/viewTable.js"></script>
   <script type="text/javascript">
-//    viewTable.init({{ source_id }});
+    viewTable.init({{ source_id }});
   </script>
 {% endblock jquery %}
 
