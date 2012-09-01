@@ -241,7 +241,6 @@ function update_mapping_choice (mlist) {
         .attr('id', fromId + '-is-' + toId)
         .attr('data-original-title', title)
         .attr('title', title)
-        .end()
 	.closest('.match')
         .find('.score-color')
 	.css('background-color', borderColor)
