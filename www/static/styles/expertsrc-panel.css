@@ -182,8 +182,8 @@ body {margin:0;padding:0;}
 .histo-axis {stroke:black;stroke-width:1;fill:none;}
 .histo-label {stroke:none;fill:black;}
 
-.viewTable {margin:0;padding:0;}
-.viewTable table {border-collapse:collapse;}
+.viewTable {margin:0;padding:0;overflow-x:scroll;overflow-y:scroll;}
+.viewTable table {border-collapse:collapse;overflow:auto;}
 .viewTable td {padding:4px;border:1px solid #ABABAB;}
 .viewTable .row-label {text-align:center;font-weight:bold;}
 .viewTable .col-label {padding:8px;text-align:center;font-weight:bold;}
