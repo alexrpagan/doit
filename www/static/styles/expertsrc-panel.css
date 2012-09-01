@@ -119,12 +119,20 @@ body {margin:0;padding:0;}
 .mapper tr.alt {}
 .mapper td {text-align:center;}
 .mapper td.help {display:none; padding: 5px;padding-left:30px; background:#f5f5f5; text-align:left;}
-.mapper .attr {width:150px;}
-.mapper .match {width:150px;}
-.mapper td.match {padding-left:5px;width:150px;color:#606060;}
-.mapper td.match table {margin-right:5px;width:80%;}
-.mapper td.match .choice {padding:8px;padding-left:25%;width:50px;border-left:3em solid #627AAD;}
-.mapper td.match .button {}
+.mapper .attr {width:100px;}
+.mapper td.match {width:100px;}
+.mapper td.match .choice {
+    padding-top: 5px;
+}  
+
+
+.score-color {
+    border-radius:4px;
+    width:30px;
+    height:30px;
+    background-color: #627AAD;
+}
+
 
 .choice.mapping {font-weight:bold;color:black;border-left:2em solid #627AAD;}
 .choice.new-mapping {font-weight:bold;color:#444444;}
@@ -133,9 +141,9 @@ body {margin:0;padding:0;}
 .mapper .map-list-container.open {display:block;position:absolute;}
 .mapper .map-list-container .filter {padding:2px;}
 .mapper .map-list-container .filter input {padding:2px;color:#606060;border-radius:4px;}
-.mapper ul.map-list {margin:0;padding:0;max-height:217px;overflow-x:hidden;overflow-y:scroll;}
-.mapper ul.map-list li.candidate {padding:4px;padding-top:10px;overflow:auto;cursor:pointer;list-style:none;border-left:2em solid #627AAD;border-bottom:1px solid white;}
-.mapper ul.map-list li.candidate:hover {background-color:#D6F6F6;}
+.mapper ul.map-list {margin:0;padding:0;max-height:217px;overflow-x:hidden;overflow-y:scroll;} 
+.mapper ul.map-list li.candidate {padding:4px;padding-top:10px;overflow:auto;cursor:pointer;list-style:none;border-left:2em solid #627AAD;border-bottom:1px solid white;} 
+.mapper ul.map-list li.candidate:hover {background-color:#D6F6F6;} */
 .mapper .suggest {padding:10px;cursor:pointer;border-left:2em solid #C0C0C0;}
 .mapper .suggest:hover {background-color:#D6F6F6;}
 

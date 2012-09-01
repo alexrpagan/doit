@@ -24,169 +24,17 @@ $(window).resize(setPaneHeights);
 $(window).resize(setMapperDimensions);
 $(window).resize();
 
-/* match menu lists  */
-var matchers = $('.mapper td.match');
 
-$(matchers).each(function () {
-    var openButton = $('.button', this);
-    var list = $('.map-list', this);
-    $(openButton).click(function (e) {
-        if ($(openButton).is('.disabled'))
-            return;
- 	e.stopPropagation();
-	toggle_match_list(list);
-    });
-});
 
-function get_match_list(mlist, field_id, afterLoad) {
-    afterLoad = (typeof afterLoad === 'function') ? afterLoad : function () {};
-    var url = basePath + 'fields/' + field_id + '/candidates/',
-        data = {},
-        callback = function (responseText) {
-            $(mlist).html(responseText);
-            init_match_list(mlist);
-            afterLoad();
-        };
-    $(mlist).html('<p>Loading...</p>');
-    $.get(url, data, callback);
-}
 
-function init_match_list(mlist) {
-    var container = $(mlist).closest('.map-list-container');
-    var pos = $(container).prev().offset();
-    if (pos.top - 32 + $(container).outerHeight() > $(window).height())
-        $(container).css('top', $(window).height() - 280);
-
-    $('.candidate', mlist).click(function () {
-        $('.selected').removeClass('selected');
-        $(this).addClass('selected');
-        update_mapping_choice(mlist);
-        close_match_list(mlist);
-    });
-}
-
-function open_match_list (mlist) {
-    //$(mlist).closest('tr').find('.button').addClass('disabled');
-    if ($('.map-list-container.open').length)
-        return;
-    var container = $(mlist).closest('.map-list-container');
-    var pos = $(container).prev().offset();
-    $(container)
-        .addClass('open')
-        .css('top', pos.top - 32)
-        .css('left', pos.left + 16);
-
-    $(container).click(function (e) {e.stopPropagation();});
-    $('body')
-	.click( function () {
-	    close_match_list(mlist);
-	});
-}
-
-function close_match_list (mlist) {
-    $(mlist).closest('.map-list-container')
-        .removeClass('open')
-        .css('top', 'auto')
-        .css('left', 'auto')
-        .closest('tr')
-            .find('.button')
-                .removeClass('disabled');
-}
-
-function toggle_match_list (mlist) {
-    if (!$(mlist).children().length) {
-        var field_id = $(mlist).closest('td').find('.choice')
-                           .attr('id').split('-is-')[0];
-        get_match_list(mlist, field_id);
-    }
-    if ($(mlist).closest('.map-list-container').is('.open'))
-	close_match_list(mlist);
-    else
-	open_match_list(mlist);
-}
-
-function update_mapping_choice (mlist) {
-    var choice = $('.selected', mlist);
-    var mapping = $(choice).attr('id').split('-to-');
-    var fromId = mapping[0];
-    var toId = mapping[1];
-    var name = $(choice).text();
-    var borderColor = $(choice).css('border-left-color');
-    var title = $(choice).attr('title');
-    var target = $(choice).closest('td').find('.choice');
-    $(target)
-        .text(name)
-        .css('border-left-color', borderColor)
-        .attr('id', fromId + '-is-' + toId)
-        .attr('data-original-title', title)
-        .attr('title', title);
-    update_score_tooltips();
-}
-
-/* match list filters */
-$('.map-list-container')
-    .find('.filter')
-    .children()
-    .focus(function () {
-        if ($(this).val() === 'Filter')
-            $(this).val('');
-    })
-    .blur(function () {
-        if ($(this).val() === '')
-            $(this).val('Filter');
-    })
-    .keyup(function () {
-        update_filter(this);
-    });
-
-function update_filter (inputEl) {
-    var patterns = $(inputEl).val().toLowerCase().split(' ');
-    var listElems = $(inputEl).closest('.map-list-container').find('.candidate');
-    if (!patterns.length)
-        $(listElems).show();
-    else
-        $(listElems)
-            .hide()
-            .filter(function () {
-                for (var i=0; i<patterns.length; i++)
-                    if ($(this).text().toLowerCase().indexOf(patterns[i]) === -1)
-                        return false;
-                return true;
-            })
-            .show();
-}
-
-/* match list "suggest new..." buttons */
-var $suggButtons = $('.map-list-container .suggest');
-
-$suggButtons.click(function () {
-   var $this = $(this),
-       $row = $this.closest('.mapper-row'),
-       fid = $row.attr('id').substr(3),
-       fname = $row.find('.attr').text(),
-       url = basePath + 'suggest-new-attribute/form?fid=' + fid + '&fname=' + fname,
-       width = 600,
-       callback = function () {
-           var $suggestForm = $('.popover form');
-           $suggestForm.submit(function (e) {
-               e.preventDefault();
-               var url = basePath + 'suggest-new-attribute/',
-                   data = $suggestForm.serialize(),
-                   callback = function () {
-                       alert('Ok!');
-                       close_popover();
-                   };
-               $.post(url, data, callback);
-           });
-       };
-   fill_popover(url, width, callback); 
-});
 
 /* action buttons */
 var actions = $('.actions');
 var accept_buttons = $('.accept', actions);
 var reject_buttons = $('.reject', actions);
 var reset_buttons  = $('.reset',  actions);
+var dropdown_buttons = $('.drop', actions);
+
 var viewsource_buttons = $('.viewsource');
 
 $(accept_buttons).each( function () {
@@ -233,7 +81,7 @@ $(reject_buttons).each(function () {
             update_mapping_choice($mlist);
         }
         if (!$mlist.find('.candidate').length)
-            get_match_list($mlist, fieldId, selectNextChoice);
+            fetch_match_list($mlist, fieldId, selectNextChoice);
         else
             selectNextChoice();
     });
@@ -339,6 +187,103 @@ $('.toggle-data-panel').each(
 	});
     });
 
+
+/* match list dropdowns */
+
+$(dropdown_buttons).each(function() {
+    var list = $(this).closest('.btn-group').find('.map-list');
+    $(this).click(function(e) {
+	if($(this).is('.disabled')){
+	    return;
+	}
+	load_match_list(list);
+    });
+});
+
+function load_match_list(mlist) {
+    // if it's empty, fetch the mappings.
+    if (!$(mlist).children().length) {
+        var field_id = $(mlist).closest('tr').find('.choice')
+                           .attr('id').split('-is-')[0];
+        fetch_match_list(mlist, field_id);
+    }
+}
+
+function fetch_match_list(mlist, field_id, afterLoad) {
+    afterLoad = (typeof afterLoad === 'function') ? afterLoad : function () {};
+    var url = basePath + 'fields/' + field_id + '/candidates/',
+        data = {},
+        callback = function (responseText) {
+            $(mlist).html(responseText);
+	    $('.candidate', mlist).click(function () {
+		$('.selected').removeClass('selected');
+		$(this).addClass('selected');
+		update_mapping_choice(mlist);
+	    });
+            afterLoad();
+        };
+    $(mlist).html('<p>Loading...</p>');
+    $.get(url, data, callback);
+}
+
+function update_mapping_choice (mlist) {
+    var choice = $('.selected', mlist);
+    var mapping = $(choice).attr('id').split('-to-');
+    var fromId = mapping[0];
+    var toId = mapping[1];
+    var name = $(choice).text();
+    var borderColor = $(choice).css('border-left-color');
+    var title = $(choice).attr('title');
+    var target = $(choice).closest('tr').find('.choice');
+
+    $(target)
+        .text(name)
+        .attr('id', fromId + '-is-' + toId)
+        .attr('data-original-title', title)
+        .attr('title', title)
+        .end()
+	.closest('.match')
+        .find('.score-color')
+	.css('background-color', borderColor)
+        .end();
+
+    update_score_tooltips();
+}
+
+$('.filter').each(function(){
+    $(this).click(function(e){
+	// make sure that dropdown doesn't close
+	e.stopPropagation();
+    });
+});
+
+/* match list filters */
+$('.map-list-cont')
+    .find('.filter')
+    .children()
+    .keyup(function (e) {
+	e.stopPropagation();
+        update_filter(this);
+    });
+
+function update_filter (inputEl) {
+    var patterns = $(inputEl).val().toLowerCase().split(' ');
+    var listElems = $(inputEl).closest('.map-list-cont').find('.candidate');
+    if (!patterns.length)
+        $(listElems).show();
+    else
+        $(listElems)
+            .hide()
+            .filter(function () {
+                for (var i=0; i<patterns.length; i++)
+                    if ($(this).text().toLowerCase().indexOf(patterns[i]) === -1)
+                        return false;
+                return true;
+            })
+            .show();
+}
+
+
 /* control panel */
 var $saveButton = $('.control.save', topPane),
     $resetButton = $('.control.reset', topPane),
@@ -360,48 +305,43 @@ $saveButton.click(function () {
         mappings = [],
         rejected = [];
 
+    var matchers = $('.map-list');
+
     $('.new-mapping', matchers).each(function () {
 	mappings.push($(this).attr('id').split('-is-'));
     });
     $('.rejected', matchers).each(function () {
 	rejected.push($(this).attr('id').split('-to-'));
     });
+    var answerer_id = $('input#answerer_id').val();
+    var msg = 
+	"After you save your answers, there is no wat to alter them. " +
+	"Are you sure that you want to do this?";
 
-    answerer_id = $('input#answerer_id').val();
-
-    save_anyway = confirm("After you save your answers, there is no way to alter them. Are you sure that you want to save?");
-
+    var save_anyway = confirm(msg);
     if (save_anyway && mappings.length + rejected.length) {
         var url = basePath + 'save',
             data = 'mappings=' + JSON.stringify(mappings) +
                    '&rejects=' + JSON.stringify(rejected) +
 	           '&answerer_id=' + answerer_id,
-
             callback = function (d) {
 		$('.confidence').hide();
-
 		$('.new-mapping')
 		    .closest('.mapper-row')
 		    .addClass('hide')
-
-		$('.rejected')
-		    .closest('.mapper-row')
-		    .addClass('hide')
-
-                $('.new-mapping')
                     .removeClass('new-mapping')
                     .addClass('mapping')
                     .removeAttr('style');
-
-                $('.rejected').removeClass('rejected');
-
+		$('.rejected')
+		    .closest('.mapper-row')
+		    .addClass('hide')
+		    .removeClass('rejected');
 		$('.dirty').each(function() {
 		    $(this).removeClass('dirty').addClass('committed');
 		});
-
 		update_save_button();
-
 		if($('.mapper-row').length == $('.mapper-row.hide').length){
+		    // TODO: do this!
 		    alert('Loading x more questions...');
 		}
             };
@@ -411,9 +351,9 @@ $saveButton.click(function () {
 
 $backButton.click(function() {
     var url = $('#backlink').attr('href');
-    // if unsaved changes, create popup asking really?
+    var msg = "You have unsaved work. Do you want to abandon your changes?";
     if (page_has_unsaved_content()){
-	var really_leave = confirm("You have unsaved work. Do you want to abandon your changes?");
+	var really_leave = confirm(msg);
 	if (really_leave) {
 	    window.location = url;
 	}
@@ -421,6 +361,9 @@ $backButton.click(function() {
 	window.location = url;
     }
 });
+
+
+
 
 /* help */
 
@@ -445,16 +388,22 @@ $helpButton.click(function() {
 
 $('.help').click(function(){toggle_help()})
 
+
+
+
 /* detailed views */
 var detail_buttons = $('.detail', actions);
 
 $(detail_buttons).each( function () {
-//    var attr_name = encodeURIComponent($(this).closest('tr').children().first().text());
     var fid = $(this).closest('tr').attr('id').slice(3);
     $(this).click( function () {
 	fill_popover(basePath + 'fields/' + fid + '/summary', 600);
     });
 });
+
+
+
+/* Popovers */
 
 function open_popover (width) {
     $('#detailModal').modal('show');
@@ -475,9 +424,11 @@ function fill_popover (url, width, callback) {
 	$("#modal-contents").html(d);
         callback();
     });
-
     return $(pop);
 }
+
+
+
 
 /* tooltips */
 
@@ -490,12 +441,13 @@ function init_static_tooltips () {
 	selector:'span[rel=tooltip]', 
 	delay: {show: 250, hide:100 },
 	placement:'bottom'});
-
     $('.tooltip-container.viewsource-btn-box').tooltip({
 	selector:'span[rel=tooltip]', 
 	delay: {show: 250, hide:100 },
 	placement:'right'});
 }
+
+
 
 /*confidence sliders*/
 
@@ -530,6 +482,8 @@ function init_sliders() {
 }
 
 
+
+
 /* save button status */
 
 function page_has_unsaved_content() {
@@ -544,6 +498,9 @@ function update_save_button() {
 	$saveButton.removeClass(indic_class);
     }
 }
+
+
+/* my lame attempt to pool all the stuff that has to be init'd on page load together */
 
 function init_page() {
     init_help();

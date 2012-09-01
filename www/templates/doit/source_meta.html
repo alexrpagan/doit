@@ -1,11 +1,17 @@
 <div class="source-meta">
   <table>
     <tr><th colspan=2 class="header-rounded lead">Source Metadata</th></tr>
+    {% if meta.data %}
     {% for meta in meta.data %}
     <tr class="{% cycle '' 'alt' %}">
       <th>{{ meta.name }}</th>
       <td title="{{ meta.value }}">{{ meta.value|truncatewords:6 }}</td>
     </tr>
     {% endfor %}
+    {% else %}
+    <tr>
+      <td><p> This source has no meta data.</p></td>
+    </tr>
+    {% endif %}
   </table>
 </div>
