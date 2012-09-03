@@ -57,9 +57,13 @@ body {margin:0;padding:0;}
 //    background-color:#EFEFEF;
 //    border:1px solid #BBBBBB;
 }
-.pane.top {clear:both;padding:10px;margin-bottom:0px;font-size:12pt;border-bottom:2px solid #BBB}
-.pane.left {float:left;width:268px;}
+.pane.top {clear:both;padding:10px;margin-bottom:0px;font-size:12pt;border-bottom:2px solid #BBB;}
+.pane.left {position:relative; float:left;width:268px;height:100%;border-right:2px solid #BBB;}
 .pane.right {padding:0px;margin-top:0px;}
+
+.data-nav {
+    margin-right:10px;
+}
 
 .textFilter-hidden {display:none;}
 .sourceFilter-hidden {display:none;}
@@ -182,7 +186,7 @@ body {margin:0;padding:0;}
 .histo-axis {stroke:black;stroke-width:1;fill:none;}
 .histo-label {stroke:none;fill:black;}
 
-.viewTable {margin:0;padding:0;overflow-x:scroll;overflow-y:scroll;}
+.viewTable {margin:0;padding:0;}
 .viewTable table {border-collapse:collapse;overflow:auto;}
 .viewTable td {padding:4px;border:1px solid #ABABAB;}
 .viewTable .row-label {text-align:center;font-weight:bold;}

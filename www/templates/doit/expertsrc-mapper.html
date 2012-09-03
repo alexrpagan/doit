@@ -61,6 +61,12 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     </table>
   </div>
   <div class="pane left hide">
+    <div class="data-nav">
+      <div class="alert alert-info">
+	<a class="close" href="#" data-dismiss="alert">&times;</a>
+	Use the arrow keys or scrollbars to navigate through the data table.
+      </div>
+    </div>
     <div class="source-meta">
     </div>
   </div>
@@ -149,7 +155,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 	   <span class="btn-toolbar">
 
 	     <span class="dropdown btn-group">
-	       <span id="drop-{{attr.id}}" class="drop btn dropdown-toggle" role="button" data-toggle="dropdown" data-target="#"><i class="icon-search icon-chevron-down"></i></span>
+	       <span id="drop-{{attr.id}}" class="drop btn dropdown-toggle btn-tooltip" role="button" data-toggle="dropdown" data-target="#" title="See other potential matches..."><i class="icon-search icon-chevron-down"></i></span>
 	       <div class="dropdown-menu map-list-cont"  aria-labeledby="drop-{{attr.id}}" role="menu">
 		 <div class="filter"><input type="text" placeholder="Filter..."></input></div>
 		 <ul class="map-list"></ul>
@@ -157,10 +163,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 	     </span>
 
 	     <span class="btn-group per-row-actions">
-	       <span class="btn accept"><i class="icon-search icon-ok"></i></span>
-	       <span class="btn reject"><i class="icon-search icon-remove"></i></span>
-	       <span class="btn reset">Reset</span>
-	       <span class="btn detail"><i class="icon-search icon-info"></i></span>
+	       <span class="btn btn-tooltip accept" title="This match is correct"><i class="icon-search icon-ok"></i></span>
+	       <span class="btn btn-tooltip reject" title="Not a valid match!"><i class="icon-search icon-remove"></i></span>
+	       <span class="btn btn-tooltip reset" title="Reset match">Reset</span>
+	       <span class="btn btn-tooltip detail" title="Get info about match"><i class="icon-search icon-info"></i></span>
 	     </span>
 	   </span>
 	</td>

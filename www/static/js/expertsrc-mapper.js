@@ -438,12 +438,17 @@ function update_score_tooltips () {
 function init_static_tooltips () {
     $('.tooltip-container.example').tooltip({
 	selector:'span[rel=tooltip]', 
-	delay: {show: 250, hide:100 },
+	delay: {show: 250, hide:0 },
 	placement:'bottom'});
     $('.tooltip-container.viewsource-btn-box').tooltip({
 	selector:'span[rel=tooltip]', 
-	delay: {show: 250, hide:100 },
+	delay: {show: 250, hide:0 },
 	placement:'right'});
+    $('.actions').tooltip({
+	selector:'.btn-tooltip',
+	delay: {show: 750, hide:0 },
+	placement:'bottom'
+    });
 }
 
 
