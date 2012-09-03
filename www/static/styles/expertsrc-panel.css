@@ -174,7 +174,7 @@ body {margin:0;padding:0;}
 
 .link-here {font-weight:bold;text-decoration:none;color:black;}
 
-.spreadsheetish {margin:0;padding:0;border-top:1px solid #808080;border-left:1px solid #808080;border-collapse:collapse;}
+.spreadsheetish {margin:0;padding:0;border-top:1px solid #808080;border-left:1px solid #808080;border-collapse:collapse;overflow:auto;}
 .spreadsheetish td {margin:0;padding:4px;border-right:1px solid #B0B0B0;border-bottom:1px solid #B0B0B0;}
 .spreadsheetish .header {font-weight:bold;}
 .spreadsheetish .highlight {background-color:#D0D0FF;}

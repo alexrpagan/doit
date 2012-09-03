@@ -165,11 +165,12 @@ def lowscoremapper(req, dbname):
 def detail_summary(req, dbname, fid):
 	db = DoitDB(dbname)
 	attr_name = db.fieldname(fid)
+	source_name = db.fieldsource(fid)
 	meta = db.field_meta(fid)
 	vals = db.fieldexamples(fid, 1000, distinct=False)
 	histo = bucketize(vals)
 	return render_to_response('doit/pop_summary.html', {
-            'histo': histo, 'attr_name': attr_name, 'source': '', 'fid': fid,
+            'histo': histo, 'attr_name': attr_name, 'source': source_name, 'fid': fid,
             'metadata': meta, 'db': dbname,})
 
 def detail_examples(req, dbname, fid):

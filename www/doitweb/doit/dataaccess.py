@@ -442,6 +442,13 @@ class DoitDB:
 	    cur.execute(cmd, (field_id,))
 	    return cur.fetchone()[0]
 
+    def fieldsource(self, field_id):
+        cur = self.conn.cursor()
+        cmd = '''SELECT ls.local_id FROM local_fields lf, local_sources ls
+                 WHERE lf.source_id = ls.id AND lf.id = %s'''
+        cur.execute(cmd, (field_id,))
+        return cur.fetchone()[0]
+
     # get metadata about a given field
     def fieldmeta(self, field_id):
 	    cur = self.conn.cursor()

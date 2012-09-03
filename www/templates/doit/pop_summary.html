@@ -25,7 +25,12 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 {% block content %}
 <div style="margin:1em;">
-  <h4>'{{ attr_name }}' in Source {{ source }}</h4>
+
+  <p>
+    '<b>{{ attr_name }}</b>' in {{ source }}.
+  </p>
+
+  <hr />
 
   {% if histo %}
   <div id="summary-histo" style="float:right;" class="histo-medium"></div>
@@ -35,10 +40,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
   {% else %}
   {% endif %}
 
-  <div>About {{ attr_name }}:</div>
+  <div class="lead">Metadata:</div>
   <table>
     {% for meta in metadata %}
-    <tr><th style="text-align:left;">{{ meta.name }}</th><td>{{ meta.value }}</td></tr>
+    <tr><th style="text-align:left;">{{ meta.name }}</th><td style="padding-left:10px;">{{ meta.value }}</td></tr>
     {% endfor %}
   </table>
 

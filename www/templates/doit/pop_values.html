@@ -25,20 +25,21 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 {% block content %}
 <div>
-
   <div style="margin:1em;">
-    {% block subnav-egs %}
-    <a href="/doit/{{ db }}/fields/{{ fid }}/values/examples"
-       onclick="fill_popover(this.href, 800); return false;">Example Values</a>
-    {% endblock subnav-egs %} |
-    {% block subnav-shared %}
-    <a href="/doit/{{ db }}/fields/{{ fid }}/values/shared" 
-       onclick="fill_popover(this.href, 800); return false;">Shared Values</a>
-    {% endblock subnav-shared %} |
-    {% block subnav-distro %}
-    <a href="/doit/{{ db }}/fields/{{ fid }}/values/distro" 
-       onclick="fill_popover(this.href, 800); return false;">Distributions</a>
-    {% endblock subnav-distro %}
+    <ul class="nav nav-pills">
+      <li class="{% block subnav-egs %}{% endblock subnav-egs%}">
+	<a href="/doit/{{ db }}/fields/{{ fid }}/values/examples"
+	   onclick="fill_popover(this.href, 800); return false;">Example Values</a>
+      </li>
+      <li class="{% block subnav-shared %} {% endblock subnav-shared %}">
+	<a href="/doit/{{ db }}/fields/{{ fid }}/values/shared" 
+	   onclick="fill_popover(this.href, 800); return false;">Shared Values</a>
+      </li>
+      <!-- <li class="{% block subnav-distro %}{% endblock subnav-distro %}"> -->
+      <!-- 	<a href="/doit/{{ db }}/fields/{{ fid }}/values/distro"  -->
+      <!-- 	   onclick="fill_popover(this.href, 800); return false;">Distributions</a> -->
+      <!-- </li> -->
+    </ul>
   </div>
 
   {% block info %}{% endblock info %}
