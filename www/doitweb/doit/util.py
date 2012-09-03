@@ -22,7 +22,7 @@ def bucketize(vals):
     if len(nums) <= 1:
         return dict()
 
-    n_buckets = math.ceil(math.sqrt(len(nums)))
+    n_buckets = int(math.ceil(math.sqrt(len(nums))))
 
     dv = stddev(nums)
     av = avg(nums)
