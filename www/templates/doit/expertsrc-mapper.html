@@ -75,6 +75,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     <div class="viewTable hide">
       
     </div>
+    <div class="msg alert alert-info hide">
+      <a href="#" class="close" data-dismiss="alert">&times;</a>
+      <span class="msg-text"></span>
+    </div>
     <table class="table mapper">
 	<tr>
 	  <th class="attr header-left lead">Data Attribute</th>
@@ -96,23 +100,35 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 	  </td>
 	  <td class="match help">
 	    <p>
-	      These are global attributes that we've generated as possible matches for the data attributes (left).
-	      The colored field at left indicates our confidence that the pair is a valid match. More candidates are available in the dropdown at right.
+	      These are global attributes that we've automatically generated as possible matches.
+	    </p>
+	    <p>
+	      The colored field at left indicates our confidence that the pair is a valid match.
 	    </p>
 	  </td>
 	  <td class="actions help">
-	    <p>
-	      <i class="icon-search icon-ok"></i> - The match is <b>correct</b>.
-	    </p>
-	    <p>
-	      <i class="icon-search icon-remove"></i> - The match is <b>incorrect</b>.
-	    </p>
-	    <p>
-	      <i class="icon-search icon-info"></i> - More info about the match.
-	    </p>
+	    <div style="text-align:center;">
+	      <p>
+		<i class="icon-search icon-ok"></i> - The match is <b>correct</b>.
+	      </p>
+	      <p>
+		<i class="icon-search icon-remove"></i> - The match is <b>incorrect</b>.
+	      </p>
+	      <p>
+		<i class="icon-search icon-repeat"></i> - Reset the match.
+	      </p>
+	      <p>
+		<i class="icon-search icon-info"></i> - More info about the match.
+	      </p>
+	    </div>
 	  </td>
 	  <td class="status help">
-	    This column indicates whether the field has been mapped. Unsaved changes are show in <i>italics</i>. Committed changes are <b>bolded</b>.
+	    <p>
+	      This column indicates whether the field has been mapped. 
+	    </p>
+	    <p>
+	      Unsaved changes are show in <i>italics</i>.
+	    </p>
 	  </td>
 	</tr>
       {% for attr in attr_list %}
@@ -157,7 +173,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 	     <span class="dropdown btn-group">
 	       <span id="drop-{{attr.id}}" class="drop btn dropdown-toggle btn-tooltip" role="button" data-toggle="dropdown" data-target="#" title="See other potential matches..."><i class="icon-search icon-chevron-down"></i></span>
 	       <div class="dropdown-menu map-list-cont"  aria-labeledby="drop-{{attr.id}}" role="menu">
-		 <div class="filter"><input type="text" placeholder="Filter..."></input></div>
+		 <div class="filter" style="margin:5px;"><input type="text" placeholder="Filter..."></input></div>
 		 <ul class="map-list"></ul>
 	       </div>
 	     </span>
@@ -176,7 +192,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 	<td></td>
 	<td></td>
 	<td class="actions">
-	  <p><small>Confidence:</small></p>
+	  <p title="How confident are you in your answer?"><small>Confidence:</small></p>
           <div class="confidence-slider" data-confidence=""></div>
 	</td>
 	<td><a href="#" class="btn btn-large done-with-confidence">OK</a></td>

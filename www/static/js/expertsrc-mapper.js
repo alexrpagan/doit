@@ -53,7 +53,7 @@ $(accept_buttons).each( function () {
 	        .find('.choice')	// The chosen match list item
 	           .removeClass('rejected')
 	           .addClass('new-mapping')
-	        .end()
+                .end()
 	    .end()
 	    .find('.status')	// The attributes status cell
 	        .text('mapped')
@@ -184,6 +184,11 @@ $(viewsource_buttons).each(function() {
     var source_name = $(this).data('source-name');
     $(this).click( function () {
 	load_source(source_id);
+	// $('.toggle-data-panel')
+	//     .data('placement', 'bottom')
+	//     .data('delay', {show : 500, hide : 0})
+	//     .attr('title', source_name)
+	//     .tooltip();
 	$('.current-source').text(source_name);
     });
 });
@@ -317,10 +322,10 @@ $saveButton.click(function () {
 
     var matchers = $('.map-list');
 
-    $('.new-mapping', matchers).each(function () {
+    $('.new-mapping').each(function () {
 	mappings.push($(this).attr('id').split('-is-'));
     });
-    $('.rejected', matchers).each(function () {
+    $('.rejected').each(function () {
 	rejected.push($(this).attr('id').split('-to-'));
     });
     var answerer_id = $('input#answerer_id').val();
@@ -329,7 +334,9 @@ $saveButton.click(function () {
 	"Are you sure that you want to do this?";
 
     var save_anyway = confirm(msg);
-    if (save_anyway && mappings.length + rejected.length) {
+    var any_changed = (mappings.length + rejected.length) > 0;
+
+    if (save_anyway && any_changed) {
         var url = basePath + 'save',
             data = 'mappings=' + JSON.stringify(mappings) +
                    '&rejects=' + JSON.stringify(rejected) +
@@ -349,11 +356,28 @@ $saveButton.click(function () {
 		$('.dirty').each(function() {
 		    $(this).removeClass('dirty').addClass('committed');
 		});
+
 		update_save_button();
+
+		var msg = $('.msg').first();
 		if($('.mapper-row').length == $('.mapper-row.hide').length){
-		    // TODO: do this!
-		    alert('Loading x more questions...');
+		    $(msg)
+			.show()
+		        .find('.msg-text')
+			.text('Loading x more questions.');
+		    setTimeout(function () {
+			$(msg).hide('fade');
+		    }, 1500);
+		} else {
+		    $(msg)
+			.show()
+		        .find('.msg-text')
+			.text('Saved successfully.');
+		    setTimeout(function () {
+			$(msg).hide('fade');
+		    }, 1500);
 		}
+
             };
         $.post(url, data, callback);
     }

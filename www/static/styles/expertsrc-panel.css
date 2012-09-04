@@ -44,6 +44,13 @@ body {margin:0;padding:0;}
   color: white;
 }
 
+.msg {
+    width: 50%;
+    margin: 0px auto;
+    margin-top:10px;
+    margin-bottom:10px;
+}
+
 
 #content {}
 .jumbotron{background-color:#EFEFEF;padding:20px;}
