@@ -322,21 +322,32 @@ $saveButton.click(function () {
 
     var matchers = $('.map-list');
 
+    // collect changes
     $('.new-mapping').each(function () {
 	mappings.push($(this).attr('id').split('-is-'));
     });
     $('.rejected').each(function () {
 	rejected.push($(this).attr('id').split('-to-'));
     });
-    var answerer_id = $('input#answerer_id').val();
+
+    // fetch data retrieved from expertsrc
+    var page_data = $('input#page-data');
+    var answerer_id = $(page_data).data('answerer-id');
+    var page_size = $(page_data).data('page-size');
+
+    var any_changed = (mappings.length + rejected.length) > 0;
+    
+    if(!any_changed) {
+	return;
+    }
+    
     var msg = 
 	"After you save your answers, there is no wat to alter them. " +
 	"Are you sure that you want to do this?";
 
     var save_anyway = confirm(msg);
-    var any_changed = (mappings.length + rejected.length) > 0;
 
-    if (save_anyway && any_changed) {
+    if (save_anyway) {
         var url = basePath + 'save',
             data = 'mappings=' + JSON.stringify(mappings) +
                    '&rejects=' + JSON.stringify(rejected) +

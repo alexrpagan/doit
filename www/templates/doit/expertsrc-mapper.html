@@ -25,11 +25,13 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
 {% block styles %}
-<link rel="stylesheet" href="/static/styles/base/jquery.ui.all.css" type="text/css" media="screen"/>
+<link rel="stylesheet" href="/static/styles/base/jquery.ui.core.css" type="text/css" media="screen"/>
+<link rel="stylesheet" href="/static/styles/base/jquery.ui.slider.css" type="text/css" media="screen"/>
 {% endblock styles %}
 
 
 {% block content %}
+  <input id="page-data" type="hidden" data-answerer-id="{{answerer_id}}" data-page-size="{{page_size}}"/>
 
   <input id="answerer_id" type="hidden" value="{{answerer_id}}">
 
