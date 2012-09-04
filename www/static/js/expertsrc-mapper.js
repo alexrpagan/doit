@@ -51,6 +51,7 @@ $(accept_buttons).each( function () {
                     .addClass('disabled')
                 .end()
 	        .find('.choice')	// The chosen match list item
+	           .removeClass('rejected')
 	           .addClass('new-mapping')
 	        .end()
 	    .end()
@@ -89,8 +90,11 @@ $(reject_buttons).each(function () {
 
 $(reset_buttons).each( function () {
     var $container = $(this).parent().closest('tr');
+    var $mlist = $container.find('.map-list');
+
     if ($container.find('.choice.mapping').length)
         return;
+
     $(this).click( function () {
 	$container.next().hide();
 	$container
@@ -104,14 +108,18 @@ $(reset_buttons).each( function () {
 	            .removeClass('new-mapping')
                     .removeClass('mapping')
 	        .end()
-                //.find('.rejected')
-                //    .removeClass('rejected')
-                //.end()
 	    .end()
 	    .find('.status')
                 .removeClass('dirty')
 	        .text('unmapped')
 	    .end();
+
+	$('.dirty', $container).removeClass('dirty');
+	$('.rejected', $mlist).removeClass('rejected');
+	$('.selected', $mlist).removeClass('selected');
+	$('.candidate', $mlist).first().addClass('selected');
+
+	update_mapping_choice($mlist);
 	update_save_button();
     });
 });
@@ -228,6 +236,9 @@ function fetch_match_list(mlist, field_id, afterLoad) {
 
 function update_mapping_choice (mlist) {
     var choice = $('.selected', mlist);
+    if(!$(choice).attr('id')){
+	return;
+    }
     var mapping = $(choice).attr('id').split('-to-');
     var fromId = mapping[0];
     var toId = mapping[1];

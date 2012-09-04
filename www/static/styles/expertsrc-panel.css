@@ -151,7 +151,7 @@ body {margin:0;padding:0;}
 .mapper .suggest {padding:10px;cursor:pointer;border-left:2em solid #C0C0C0;}
 .mapper .suggest:hover {background-color:#D6F6F6;}
 
-.mapper .actions {width:100px;}
+.mapper .actions {width:130px;}
 .mapper .status {width:70px;}
 
 .control {padding:8px 16px;font-style:normal;cursor:pointer;}
@@ -162,8 +162,9 @@ body {margin:0;padding:0;}
 
 .unmapped .accept {}
 .unmapped .reject {}
-.unmapped .reset  {display:none;}
+.unmapped .reset  {}
 .unmapped .detail {}
+
 .mapped .accept {display:none;}
 .mapped .reject {display:none;}
 .mapped .reset  {}
