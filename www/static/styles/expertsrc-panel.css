@@ -60,13 +60,20 @@ body {margin:0;padding:0;}
 
 .pane {
     padding:10px;
-    overflow:auto;
+//    overflow:auto;
 //    background-color:#EFEFEF;
 //    border:1px solid #BBBBBB;
 }
-.pane.top {clear:both;padding:10px;margin-bottom:0px;font-size:12pt;border-bottom:2px solid #BBB;}
-.pane.left {position:relative; float:left;width:268px;height:100%;border-right:2px solid #BBB;}
-.pane.right {padding:0px;margin-top:0px;}
+.pane.top {
+    position:relative;
+    clear:both;
+    padding:10px;
+    margin-bottom:0px;
+    font-size:12pt;
+    border-bottom:2px solid #BBB;
+}
+.pane.left {position:relative; float:left;width:268px;height:100%;border-right:2px solid #BBB; overflow:auto;}
+.pane.right {padding:0px;margin-top:0px;overflow:auto;}
 
 .data-nav {
     margin-right:10px;
@@ -122,11 +129,61 @@ body {margin:0;padding:0;}
 }
 
 .mapper {
-    margin:10px;
+    margin:0px;
     width:100%;
 //    background-color:#EFEFEF;
 //    border-collapse:collapse;
 }
+
+.help-top {
+    margin-bottom:0px;
+    padding:15px;
+}
+
+.help-top .nix-help-button {
+    margin: 0px auto;
+    width: 100px;
+    padding:15px;
+}
+
+.help-top .help-close {
+    text-align:center;
+}
+
+.help-inner {
+    position: relative;
+    background-color: #FFF;
+    width:75%;
+    margin: 0px auto;
+    border:2px solid #BBB;
+    border-radius:10px;
+    text-align: center;
+}
+
+.help-inner .main-copy {
+    text-align: left;
+    margin: 0 auto;
+    margin-top: 10px; 
+    width: 75%;
+}
+
+/* .help-inner .fixed-bottom { */
+/*     width:100%; */
+/*     margin:0px; */
+/*     position:absolute; */
+/*     bottom:0; */
+/* } */
+
+.help-inner .fixed-bottom p {
+    margin-bottom:20px;
+    text-align:center;
+}
+
+.instructions li {
+    padding:10px;
+}
+
+
 .mapper tr.alt {}
 .mapper td {text-align:center;}
 .mapper td.help {display:none; padding: 5px;padding-left:30px; background:#f5f5f5; text-align:left;}
@@ -172,10 +229,12 @@ body {margin:0;padding:0;}
 .unmapped .reset  {}
 .unmapped .detail {}
 
+.mapped .dropdown {display:none;}
 .mapped .accept {display:none;}
 .mapped .reject {display:none;}
 .mapped .reset  {}
 .mapped .detail {}
+
 
 .floatcontrol {position:fixed;bottom:0;left:0;width:100%;}
 .floatcontrol > div {margin:0 auto;width:600px;}

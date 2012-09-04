@@ -334,6 +334,7 @@ $saveButton.click(function () {
     var page_data = $('input#page-data');
     var answerer_id = $(page_data).data('answerer-id');
     var page_size = $(page_data).data('page-size');
+    var expertsrc_url = $(page_data).data('expertsrc-url');
 
     var any_changed = (mappings.length + rejected.length) > 0;
     
@@ -342,7 +343,7 @@ $saveButton.click(function () {
     }
     
     var msg = 
-	"After you save your answers, there is no wat to alter them. " +
+	"After you save your answers, there is no way to alter them. " +
 	"Are you sure that you want to do this?";
 
     var save_anyway = confirm(msg);
@@ -375,10 +376,14 @@ $saveButton.click(function () {
 		    $(msg)
 			.show()
 		        .find('.msg-text')
-			.text('Loading x more questions.');
+			.text('Loading more questions...');
+
+		    window.location = expertsrc_url + '/answer/next_question';
+
 		    setTimeout(function () {
 			$(msg).hide('fade');
 		    }, 1500);
+
 		} else {
 		    $(msg)
 			.show()
