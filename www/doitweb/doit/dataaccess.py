@@ -138,7 +138,7 @@ class DoitDB:
 	metadata.insert(0, {'name': 'Name', 'value': rec[1]})
 	return metadata
 
-    def create_mappings(self, pairs, anti=False, answerer_id=0):
+    def create_mappings(self, pairs, anti=False, answerer_id=0, answerer_auth=0.5):
         if len(pairs) == 0:
             return
         cur = self.conn.cursor()
@@ -151,17 +151,20 @@ class DoitDB:
               '    when_created, why_created) ' \
               'VALUES '
         if anti: cmd = cmd.replace('mappings', 'antimappings')
-        for local_id, global_id in pairs:
-            cmd = cmd + '(%s, %s, 1.0, 0.5, %s, NOW(), %s), '
+        for local_id, global_id, conf in pairs:
+            cmd = cmd + '(%s, %s, %s, %s, %s, NOW(), %s), '
 	    params.append(local_id)
 	    params.append(global_id)
+            params.append(conf/100.0)
+            params.append(answerer_auth)
 	    params.append(answerer_id)
-	    params.append(answerer_id)
+	    params.append("Expertsrc")
+
             # register answers with expertsrc
             answer = batch.getbatchobj().answer.add()
             answer.answerer_id = answerer_id 
-            answer.confidence = 1.0
-            answer.authority = 0.5
+            answer.confidence = conf/100.0
+            answer.authority = answerer_auth
             answer.global_attribute_id = int(global_id)
             answer.local_field_id = int(local_id)
             answer.is_match = not anti

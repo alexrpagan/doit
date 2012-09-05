@@ -38,12 +38,12 @@ var dropdown_buttons = $('.drop', actions);
 var viewsource_buttons = $('.viewsource');
 
 $(accept_buttons).each( function () {
-    var container = $(this).parent().closest('tr');
+    var $container = $(this).parent().closest('tr');
+    var $mlist = $container.find('.map-list');
     $(this).click( function () {
-	container.find('.status').addClass('dirty');
+	$container.find('.status').addClass('dirty');
 	update_save_button();
-	reset_and_display_slider(container.next());
-	$(container)			// This attribute's row (tr)
+	$container			// This attribute's row (tr)
 	    .addClass('mapped')
             .removeClass('unmapped')
             .find('.match')		// The td with the match list
@@ -58,6 +58,7 @@ $(accept_buttons).each( function () {
 	    .find('.status')	// The attributes status cell
 	        .text('mapped')
 	    .end();
+	reset_and_display_slider($container.next(), $container.find('.new-mapping'));
     });
 });
 
@@ -70,15 +71,18 @@ $(reject_buttons).each(function () {
     $this.click( function () {
 	$container.find('.status').addClass('dirty');
 	update_save_button();
-	reset_and_display_slider($container.next());
         function selectNextChoice () {
-	    $('.selected', $mlist)
-                .removeClass('selected')
-                .addClass('rejected')
-                .next()
-                    .addClass('selected');
+	    var $antimapped = $('.selected', $mlist)
+                                  .removeClass('selected')
+                                  .addClass('rejected');
+
+	    reset_and_display_slider($container.next(), $antimapped);
+	    var $next = $antimapped.next().addClass('selected');
+                   
+	    // wrap around
             if (!$('.selected', $mlist).length)
                 $('.candidate', $mlist).first().addClass('selected');
+
             update_mapping_choice($mlist);
         }
         if (!$mlist.find('.candidate').length)
@@ -92,6 +96,8 @@ $(reset_buttons).each( function () {
     var $container = $(this).parent().closest('tr');
     var $mlist = $container.find('.map-list');
 
+    // NB: should probably remove this as we no longer
+    // keep saved matches around.
     if ($container.find('.choice.mapping').length)
         return;
 
@@ -104,9 +110,10 @@ $(reset_buttons).each( function () {
                 .find('.button')
                     .removeClass('disabled')
                 .end()
-	        .find('.choice')
-	            .removeClass('new-mapping')
+	        .find('.choice')                //div that displays curr. choice
+	            .removeClass('new-mapping') //unmap
                     .removeClass('mapping')
+	            .data('confidence', 0)      //reset user's confidence rating
 	        .end()
 	    .end()
 	    .find('.status')
@@ -115,7 +122,16 @@ $(reset_buttons).each( function () {
 	    .end();
 
 	$('.dirty', $container).removeClass('dirty');
-	$('.rejected', $mlist).removeClass('rejected');
+
+	// wipe out confidence scores.
+	$('.candidate', $mlist).each( function () {
+	    $(this).data('confidence', 0);
+	});
+
+	$('.rejected', $mlist).each( function () {
+	    $(this).removeClass('rejected');
+	});
+
 	$('.selected', $mlist).removeClass('selected');
 	$('.candidate', $mlist).first().addClass('selected');
 
@@ -324,10 +340,11 @@ $saveButton.click(function () {
 
     // collect changes
     $('.new-mapping').each(function () {
-	mappings.push($(this).attr('id').split('-is-'));
+	mappings.push($(this).attr('id').split('-is-').concat([$(this).data('confidence')])); 
     });
+
     $('.rejected').each(function () {
-	rejected.push($(this).attr('id').split('-to-'));
+	rejected.push($(this).attr('id').split('-to-').concat([$(this).data('confidence')]));
     });
 
     // fetch data retrieved from expertsrc
@@ -368,23 +385,18 @@ $saveButton.click(function () {
 		$('.dirty').each(function() {
 		    $(this).removeClass('dirty').addClass('committed');
 		});
-
 		update_save_button();
-
 		var msg = $('.msg').first();
 		if($('.mapper-row').length == $('.mapper-row.hide').length){
 		    $(msg)
 			.show()
 		        .find('.msg-text')
 			.text('Loading more questions...');
-
-
 		    setTimeout(function () {
 			$(msg).hide('fade');
 			// TODO: push items out of the queue before doing this...
 			window.location = expertsrc_url + '/answer/next_question';
 		    }, 1500);
-
 		} else {
 		    $(msg)
 			.show()
@@ -394,7 +406,6 @@ $saveButton.click(function () {
 			$(msg).hide('fade');
 		    }, 1500);
 		}
-
             };
         $.post(url, data, callback);
     }
@@ -507,12 +518,22 @@ function init_static_tooltips () {
 
 /*confidence sliders*/
 
-function reset_and_display_slider($container) {
-    // expects the tr containing the confidence slider
+function reset_and_display_slider($container, $choice) {
+    // $container = the tr containing the confidence slider
+    // $choice = the item that has been mapped or rejected
+
     $slider = $container.find('.confidence-slider');
-    $slider.slider("value", 0);
+    $choice.data('confidence', 50);
+    $slider.slider("value", 50);
+
     // show the slider container
     $container.show();
+    var done_btn = $container.find('.done-with-confidence');
+
+    $(done_btn).unbind().click(function(){
+	$choice.data('confidence', $slider.slider('value'));
+	$container.hide();
+    });
 }
 
 function init_sliders() {
@@ -527,14 +548,6 @@ function init_sliders() {
         }
     });
     $(".confidence-slider").data('confidence', init_value); 
-    $(".confidence-slider").each( function (i) {
-	var slider = this;
-	var done_btn = $(this).parent().next().children('.done-with-confidence')[0];
-	var $container = $(this).closest('.confidence');
-	$(done_btn).click(function(){
-	    $container.hide();
-	});
-    });
 }
 
 
