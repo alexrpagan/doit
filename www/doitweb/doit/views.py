@@ -199,6 +199,7 @@ def detail_shared(req, dbname, fid):
 	attr_name = db.fieldname(fid)
 	shared = []
 	matches = db.field_candidates(fid)
+	shared_value = False
 	for match in matches[:4]:
 	    shared.append({'name': match['name'],
                            'values': db.sharedvalues(fid, match['id'])})
@@ -210,11 +211,13 @@ def detail_shared(req, dbname, fid):
 	    for match in shared:
 	        try:
 		    table[i+1].append(match['values'][i])
+		    if match['values'][i] is not None:
+			    shared_value = True
 		except IndexError:
 		    table[i+1].append(' ')
 	return render_to_response('doit/pop_shared.html', {
             'shared': table, 'attr_name': attr_name, 'fid': fid,
-            'db': dbname,})
+            'db': dbname, 'at_least_one': shared_value, })
 
 def detail_distro(req,  dbname, fid):
 	db = DoitDB(dbname)

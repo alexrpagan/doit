@@ -24,6 +24,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 {% block subnav-shared %}active{% endblock subnav-shared %}
 
 {% block info %}
+{% if at_least_one %}
 <table class="spreadsheetish">
   {% for row in shared %}
   <tr{% if forloop.first %} class="header"{% endif %}>
@@ -33,4 +34,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
   </tr>
   {% endfor %}
 </table>
+{% else %}
+<div class="alert alert-info">
+  This field does not share any values with the top global attribute matches.
+</div>
+{% endif %}
 {% endblock info %}
