@@ -195,7 +195,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 	    <div class="tooltip-container score">
               <div class="choice" rel="tooltip" id="{{ attr.id }}-is-{{ attr.match.id }}"
-	    	   title="Score: {{ attr.match.score|floatformat }} out of 4.0">
+	    	   title="{{ attr.match.score|floatformat }} out of 4.0">
                 {{ attr.match.name }}
               </div>
 	    </div>
