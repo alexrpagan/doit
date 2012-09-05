@@ -347,31 +347,33 @@ class DoitDB:
         fields = dict()
         source_ids = set()
         answered_ids = set()
+
         field_id_str = ','.join(map(str, field_ids))
-        cmd = '''SELECT lf.id, lf.local_name, ama.global_id, ga.name,
-                        ama.who_created, lf.source_id, ls.local_id
+        
+        # only fetch attributes that have not already been mapped by the user.
+        cmd = '''SELECT lf.id, lf.local_name, lf.source_id, ls.local_id
                    FROM local_fields lf
                    JOIN local_sources ls
                      ON lf.source_id = ls.id
-              LEFT JOIN attribute_mappings ama
-                     ON lf.id = ama.local_id AND ama.who_created = %s
-              LEFT JOIN global_attributes ga
-                     ON ama.global_id = ga.id '''
+              LEFT JOIN attribute_mappings map
+                     ON lf.id = map.local_id AND map.who_created = %s
+              LEFT JOIN attribute_antimappings anti
+                     ON lf.id = anti.local_id AND anti.who_created = %s
+              WHERE anti.local_id IS NULL AND map.local_id IS NULL
+                AND '''
 
         # if there's a better way to do this, I'd love to know it.
-        cmd += ('''WHERE lf.id in (%s);''' % field_id_str)
+        cmd += ('lf.id in (%s);' % field_id_str)
               
-        cur.execute(cmd, (answerer_id,))
+        cur.execute(cmd, (answerer_id,) * 2)
         
         for rec in cur.fetchall():
-            fid, fname, gid, gname, who, sid, sname = rec
+            fid, fname, sid, sname = rec
             source_ids.add(sid)
             fields.setdefault(fid, {'id': fid, 
                                     'name': fname, 
                                     'sid': sid, 
                                     'source_name': sname })
-            if gid is not None:
-                answered_ids.add(fid)
 
         cmd = '''SELECT lf.id, lf.local_name, nnr.match_id, ga.name, nnr.score
                    FROM nr_ncomp_results_tbl nnr, local_fields lf,
@@ -380,7 +382,7 @@ class DoitDB:
                     AND lf.id in (%s)
                     AND nnr.match_id = ga.id
                     AND (lf.n_values > 0 OR 1 = 1)
-               ORDER BY score desc;''' % field_id_str
+               ORDER BY score desc;''' % ','.join(map(str, fields.keys()))
 
         cur.execute(cmd)
         records = cur.fetchall()
@@ -393,21 +395,7 @@ class DoitDB:
                     'green': f2c(score / 1.0), 
                     'red':f2c(1.0 - score / 2.0)})
 
-        egs_by_source_id = {}
-        for sid in source_ids:
-            egs_by_source_id[sid] = self.examplevalues(sid)
-
-        for fid in answered_ids:
-            del fields[fid]
-
         for fid in fields:
-            sid = fields[fid]['sid']
-
-            # if fid in egs_by_source_id[sid]:
-            #     fields[fid]['example'] = egs_by_source_id[sid][int(fid)]
-            # else:
-            #     fields[fid]['example'] = 'NULL'
-
             if 'match' not in fields[fid]:
                 fields[fid]['match'] = {'id': 0, 
                                         'name': 'Unknown', 

@@ -50,6 +50,7 @@ def mapper_by_field_name(req, dbname, field_name, comp_op):
 
 def auth_user(answerer_id, fields):
 	"""
+	TODO:
 	Use the user's expertsrc session key, answerer_id, and current id selection
 	to make sure that they're answering the questions they should be.
 
@@ -66,15 +67,11 @@ def mapper_by_field_set(req, dbname):
         # hack to make sure that ids are really ints
         # this should raise an integer parse error if the ids are
         # tampered with.
-
         field_ids = map(int, fields.split(','))
-
-	# TODO: make sure that all ids are ints
 	field_mappings = db.field_mappings_by_id_list(field_ids=field_ids, 
 						      answerer_id=answerer_id)
 
 	attr_list = sorted(field_mappings.values(), key=lambda f: f['match']['score'], reverse=True)
-#	attr_list = sorted(attr_list, key=lambda f: f['sid'])
 
 	c = {'attr_list': attr_list,
 	     'expertsrc':True,

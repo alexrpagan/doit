@@ -378,10 +378,11 @@ $saveButton.click(function () {
 		        .find('.msg-text')
 			.text('Loading more questions...');
 
-		    window.location = expertsrc_url + '/answer/next_question';
 
 		    setTimeout(function () {
 			$(msg).hide('fade');
+			// TODO: push items out of the queue before doing this...
+			window.location = expertsrc_url + '/answer/next_question';
 		    }, 1500);
 
 		} else {
