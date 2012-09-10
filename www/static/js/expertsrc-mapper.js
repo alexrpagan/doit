@@ -464,6 +464,57 @@ $backButton.click(function() {
 
 /* help */
 
+// function help_sequence() {
+//     var pop_class = 'help-popover';
+//     var pop_sel = 'div.' + pop_class;
+//     var next_btn = "<hr/><span class='btn btn-primary next-help pull-right'>Continue</span>"
+
+//     var next_action = function () {
+// 	$(pop_sel).popover('destroy');
+// 	if(help_fcns.length)
+// 	    (help_fcns.shift())();
+// 	else
+// 	    alert('Done!');
+//     }
+
+//     var help_fcns = [];
+    
+//     help_fcns.push(function () {
+// 	console.log('in here!');
+
+// 	msg = "This is the name of a data attribute that we need to map. It may contain the same type of data as one of the attributes in our global schema." + next_btn
+
+
+// 	var target = $('.attr-name').first();
+
+// 	$(target).addClass('.help-popover');
+// 	$(target).attr('title', 'Test');
+// 	$(target).data('original-content', msg);
+
+// 	target.popover({
+// 	    trigger: 'manual',
+// 	    selector: '.help-popover'
+// 	});
+	
+// 	$('.next-help').click(next_action);
+	
+// 	$('.help-popover').popover('show');
+//     });
+	
+//     // explain global attribute name
+
+//     // explain score
+
+//     // explain actions panel
+
+//     // explain confidence bar
+
+//     // explain info button
+    
+//     (help_fcns.shift())();
+// }
+
+
 function init_help() {
     var seen_help = $.cookie('seen_help');
     if (!seen_help) {
