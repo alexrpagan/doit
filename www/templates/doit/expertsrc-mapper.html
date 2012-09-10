@@ -65,12 +65,13 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     </table>
   </div>
   <div class="pane left hide">
-    <div class="data-nav">
-      <div class="alert alert-info">
-	<a class="close" href="#" data-dismiss="alert">&times;</a>
-	Tip: Use the arrow keys or scrollbars to see more of the data table.
-      </div>
-    </div>
+    <!-- <div class="data-nav"> -->
+    <!--   <div class="alert alert-info"> -->
+    <!-- 	<a class="close" href="#" data-dismiss="alert">&times;</a> -->
+    <!-- 	<\!-- Tip: Use the arrow keys or scrollbars to see more of the data table. -\-> -->
+    <!-- 	<small>Source metadata is imported from Pharon.</small> -->
+    <!--   </div> -->
+    <!-- </div> -->
     <div class="source-meta">
     </div>
   </div>
@@ -106,13 +107,15 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 	    </li>
 	    <li>
 	      Indicate whether you believe the pair <b>is</b> or <b>isn't</b> a match by pressing the <i class="icon-search icon-ok"></i> or <i class="icon-search icon-remove"></i> button. 
-	      <br />
-	      <div class="alert alert-warning">
-		<b>Important!</b> You may not always be able to determine whether or not the pair is a match. This is <b>OK</b> - just give your best guess and indicate how sure you are using the confidence slider that appears when you make a decision.
+	      <div class="alert nb alert-info">
+		<b>Important!</b> You may not always be able to determine whether or not the pair is a match. This is <b>OK</b> - just give your best guess and indicate how sure you are using the confidence slider that appears after you make a decision.
 	      </div>
 	    </li>
 	    <li>
-	      If you change your mind, you can use the <i class="icon-search icon-refresh"></i> button to reset the match to what we originally suggested. <b>Note that after you press "Save" your answer is final!</b>
+	      If you change your mind, you can use the <i class="icon-search icon-refresh"></i> button to reset the match to what we originally suggested. 
+	      <div class="alert nb alert-info">
+		<b>NB:</b> After you press "Save" your answer is final!
+	      </div>
 	    </li>
 	    <li>
 	      You can navigate back to Expertsrc at any time by pressing the "Done" button.
@@ -143,7 +146,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 	  </p>
 	  <ul class="instructions">
 	    <li>
-	      Note that the assay data attributes on the page might not be from the same source. Make sure that you view the data attribute's source before making a decision!
+	      Note that the assay data attributes on the page might not be from the same source. 
+	      <div class="alert nb alert-info">
+		<b>NB:</b> Make sure that you view the data attribute's source before making a decision!
+	      </div>
 	    </li>
 	  </ul>
         </div>
@@ -178,9 +184,10 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 	      <span class="viewsource pull-left btn btn-mini" rel="tooltip" title="{{attr.source_name}}" data-source-id="{{attr.sid}}" data-source-name="{{attr.source_name}}"><i class="icon-search icon-eye-open"></i></span>
 	    </div>
 	    -->
-
-	    <div class="attr-name">
-	      {{ attr.name }}
+	    <div class="tooltip-container source-name"> 
+	      <div class="attr-name" rel="tooltip" title="From data source: '{{attr.source_name}}'">
+		{{ attr.name }}
+	      </div>
 	    </div>
 
 	  </div>

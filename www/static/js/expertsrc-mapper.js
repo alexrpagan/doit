@@ -589,10 +589,10 @@ function init_static_tooltips () {
 	selector:'span[rel=tooltip]', 
 	delay: {show: 250, hide:0 },
 	placement:'bottom'});
-    $('.tooltip-container.viewsource-btn-box').tooltip({
-	selector:'span[rel=tooltip]', 
+    $('.tooltip-container.source-name').tooltip({
+	selector:'div[rel=tooltip]', 
 	delay: {show: 250, hide:0 },
-	placement:'right'});
+	placement:'bottom'});
     $('.actions').tooltip({
 	selector:'.btn-tooltip',
 	delay: {show: 250, hide:0 },

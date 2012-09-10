@@ -51,6 +51,10 @@ body {margin:0;padding:0;}
     margin-bottom:10px;
 }
 
+.alert.nb {
+    margin-top: 15px;
+    margin-bottom: 0px;
+}
 
 #content {}
 .jumbotron{background-color:#EFEFEF;padding:20px;}

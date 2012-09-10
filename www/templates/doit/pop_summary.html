@@ -40,7 +40,13 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
   {% else %}
   {% endif %}
 
-  <div class="lead">Field Metadata:</div>
+  <div>
+    <p class="lead">
+      Field Metadata: <br/>
+      <small>Imported from Pharon</small>
+    </p>
+  </div>
+
   <table>
     {% for meta in metadata %}
     <tr><th style="text-align:left;">{{ meta.name }}</th><td style="padding-left:10px;">{{ meta.value }}</td></tr>
