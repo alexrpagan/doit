@@ -171,57 +171,69 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
       {% for attr in attr_list %}
       <tr id="fid{{ attr.id }}" class="mapper-row {% if not attr.match.is_mapping %}un{% endif %}mapped {% cycle '' 'alt' %}">
 	<td class="attr lead" >
-	  <div class="row" style="margin-left:25px;">
+	  <div class="row">
+
+	    <!--
 	    <div class="tooltip-container viewsource-btn-box">
 	      <span class="viewsource pull-left btn btn-mini" rel="tooltip" title="{{attr.source_name}}" data-source-id="{{attr.sid}}" data-source-name="{{attr.source_name}}"><i class="icon-search icon-eye-open"></i></span>
 	    </div>
+	    -->
+
 	    <div class="tooltip-container example">
-	      <span class="pull-left" rel="tooltip" style="margin-left:25px;"> {{ attr.name }} </span>
+	      <span rel="tooltip"> {{ attr.name }} </span>
 	    </div>
+
 	  </div>
 	</td>
 
 	<td class="match">
 	  <div class="row">
-	    {% if attr.match.is_mapping %}
-	    <div class="choice mapping" id="{{ attr.id }}-is-{{ attr.match.id }}">
-	      {{ attr.match.name }}
-	    </div>
-	    {% else %}
-
-	    <div class="score-color pull-left" style="background-color:#{{ attr.match.red }}{{ attr.match.green }}44;">
-	    </div>
-
 	    <div class="tooltip-container score">
               <div class="choice" rel="tooltip" id="{{ attr.id }}-is-{{ attr.match.id }}"
 	    	   title="{{ attr.match.score|floatformat }} out of 4.0">
-                {{ attr.match.name }}
+
+		<div class="score-color pull-left" style="background-color:#{{ attr.match.red }}{{ attr.match.green }}44;">
+		</div>
+
+		<div class="match-name" style="padding-top:5px;">
+		  {{ attr.match.name }}
+		</div>
               </div>
 	    </div>
-	    {% endif %}
-
-
 	  </div>
 	</td>
 	
         <td class="actions">
 	   <span class="btn-toolbar">
 
-	     <span class="dropdown btn-group">
-	       <span id="drop-{{attr.id}}" class="drop btn dropdown-toggle btn-tooltip" role="button" data-toggle="dropdown" data-target="#" title="See other potential matches..."><i class="icon-search icon-chevron-down"></i></span>
-	       <div class="dropdown-menu map-list-cont"  aria-labeledby="drop-{{attr.id}}" role="menu">
+	     <!-- <span class="dropdown btn-group"> -->
+	     <!-- </span> -->
+
+	     <span class="dropdown btn-group per-row-actions">
+	       <span class="btn btn-tooltip accept" title="This match is correct"><i class="icon-search icon-ok"></i></span>
+	       <span class="btn btn-tooltip reject" title="This is not a valid match!"><i class="icon-search icon-remove"></i></span>
+	       <span id="choice-drop-{{attr.id}}" class="drop btn dropdown-toggle btn-tooltip" role="button" data-toggle="dropdown" data-target="#" title="Map a different global attribute"><i class="icon-search icon-plus"></i></span>
+	       <div class="dropdown-menu map-list-cont"  aria-labeledby="choice-drop-{{attr.id}}" role="menu">
 		 <div class="filter" style="margin:5px;"><input type="text" placeholder="Filter..."></input></div>
 		 <ul class="map-list"></ul>
 	       </div>
+	       <!--<span class="btn btn-tooltip dont-know" title="Not enough information to answer"><i class="icon-search icon-question-sign"></i></span>-->
+	     </span> 
+	     
+	     <span class="btn-group per-row-actions">
+	       <span class="btn btn-tooltip reset" title="Reset match"><i class="icon-search icon-refresh"></i></span>
 	     </span>
 
 	     <span class="btn-group per-row-actions">
-	       <span class="btn btn-tooltip detail" title="Get info about match"><i class="icon-search icon-info"></i></span>
-	       <span class="btn btn-tooltip accept" title="This match is correct"><i class="icon-search icon-ok"></i></span>
-	       <span class="btn btn-tooltip reject" title="Not a valid match!"><i class="icon-search icon-remove"></i></span>
-	       <span class="btn btn-tooltip reset" title="Reset match"><i class="icon-search icon-repeat"></i></span>
+	       <span id="info-drop-{{attr.id}}" data-toggle="dropdown" data-target="#" class="btn btn-primary btn-tooltip dropdown-toggle" title="More information">
+		 <i class="icon-search icon-white icon-info"></i>
+	       </span>
+	       <ul class="dropdown-menu" aria-labeledby="info-drop-{{attr.id}}" role="menu">
+		 <li><a tabindex="-1" href="#" class="viewsource" title="{{attr.source_name}}" data-source-id="{{attr.sid}}" data-source-name="{{attr.source_name}}"> View data source</a></li>
+		 <li class="detail"><a tabindex="-1" href="#">View match details</a></li>
+	       </ul>
 	     </span>
-	   </span>
+
 	</td>
  	<td class="status">unmapped</td>
      </tr>
@@ -229,7 +241,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 	<td></td>
 	<td></td>
 	<td class="actions">
-	  <p title="How confident are you in your answer?"><small>Confidence:</small></p>
+	  <p title="How confident are you in your answer?">
+	    Confidence: <span class="lead"> <span class="confidence-text">0</span>%</span></p>
           <div class="confidence-slider" data-confidence=""></div>
 	</td>
 	<td><a href="#" class="btn btn-large done-with-confidence">OK</a></td>

@@ -191,20 +191,21 @@ body {margin:0;padding:0;}
 .mapper .attr {width:100px;}
 .mapper td.match {width:100px;}
 .mapper td.match .choice {
-    padding-top: 5px;
 }  
 
 
 .score-color {
+    margin:0px;
+    padding:0px;
     border-radius:4px;
     width:30px;
     height:30px;
     background-color: #627AAD;
 }
 
-
 .choice.mapping {font-weight:bold;color:black;border-left:2em solid #627AAD;}
 .choice.new-mapping {font-weight:bold;color:#444444;}
+.choice.new-antimapping {text-decoration:line-through;}
 
 .mapper .map-list-container {display:none;width:240px;border:2px solid #BBBBBB;background-color:white}
 .mapper .map-list-container.open {display:block;position:absolute;}
@@ -212,7 +213,7 @@ body {margin:0;padding:0;}
 .mapper .map-list-container .filter input {padding:2px;color:#606060;border-radius:4px;}
 .mapper ul.map-list {margin:0;padding:0;max-height:217px;overflow-x:hidden;overflow-y:scroll;} 
 .mapper ul.map-list li.candidate {padding:4px;padding-top:10px;overflow:auto;cursor:pointer;list-style:none;border-left:2em solid #627AAD;border-bottom:1px solid white;} 
-.mapper ul.map-list li.candidate:hover {background-color:#D6F6F6;} */
+.mapper ul.map-list li.candidate:hover {background-color:#D6F6F6;} 
 .mapper .suggest {padding:10px;cursor:pointer;border-left:2em solid #C0C0C0;}
 .mapper .suggest:hover {background-color:#D6F6F6;}
 
@@ -227,7 +228,7 @@ body {margin:0;padding:0;}
 
 .unmapped .accept {}
 .unmapped .reject {}
-.unmapped .reset  {}
+.unmapped .reset  {display:none;}
 .unmapped .detail {}
 
 .mapped .dropdown {display:none;}
@@ -235,6 +236,14 @@ body {margin:0;padding:0;}
 .mapped .reject {display:none;}
 .mapped .reset  {}
 .mapped .detail {}
+
+.antimapped .dropdown {display:none;}
+.antimapped .accept {display:none;}
+.antimapped .reject {display:none;}
+.antimapped .reset  {}
+.antimapped .detail {}
+
+
 
 
 .floatcontrol {position:fixed;bottom:0;left:0;width:100%;}

@@ -25,15 +25,17 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     <a href="/doit/{{ db }}/fields/{{ fid }}/summary"
        onclick="fill_popover(this.href, 600); return false;">Summary</a>
   </li>
-  
+
+  <!--
   <li class="{% block navlink-scores %}{% endblock navlink-scores %}">
     <a href="/doit/{{ db }}/fields/{{ fid }}/scores"
        onclick="fill_popover(this.href, 800); return false;">Scoring Breakdown</a>
   </li>
- 
+  -->
+
   <li class="{% block navlink-values %}{% endblock navlink-values %}">
   <a href="/doit/{{ db }}/fields/{{ fid }}/values/examples"
-     onclick="fill_popover(this.href, 800); return false;">Values</a>
+     onclick="fill_popover(this.href, 800); return false;">Compare Data Values</a>
   </li>
 </ul> 
 

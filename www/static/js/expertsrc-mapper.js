@@ -62,60 +62,80 @@ $(accept_buttons).each( function () {
     });
 });
 
+
 $(reject_buttons).each(function () {
+
     var $this = $(this),
         $container = $this.parent().closest('tr'),
 	$mlist = $container.find('.map-list'),
         currentMapping = $container.find('.choice').attr('id'),
         fieldId = currentMapping.substr(0, currentMapping.indexOf('-'));
+
     $this.click( function () {
+	// change state of the row.
+	$container
+	    .removeClass('unmapped')
+	    .removeClass('mapped')
+	    .addClass('antimapped');
+
+	if(!$mlist.find('.candidate').length)
+	    fetch_match_list($mlist, fieldId, function () {
+		if (!$('.selected', $mlist).length)
+                    $('.candidate', $mlist).first().addClass('selected');
+	    });
+
+	// item in the mlist
+	var $antimapped = 
+	    $('.selected', $mlist)
+	       .removeClass('selected')
+	       .addClass('rejected');
+
+	// global attribute container
+	var $choice = $container
+	    .find('.choice')
+	    .removeClass('new-mapping')
+	    .addClass('new-antimapping');
+
+	reset_and_display_slider($container.next(), $choice);
+	
 	$container.find('.status').addClass('dirty');
+
 	update_save_button();
-        function selectNextChoice () {
-	    var $antimapped = $('.selected', $mlist)
-                                  .removeClass('selected')
-                                  .addClass('rejected');
+	
+	$container
+	    .find('.status')
+	    .text('rejected');
 
-	    reset_and_display_slider($container.next(), $antimapped);
-	    var $next = $antimapped.next().addClass('selected');
-                   
-	    // wrap around
-            if (!$('.selected', $mlist).length)
-                $('.candidate', $mlist).first().addClass('selected');
+	$container
+	    .find('.score-color')
+	    .css('background-color', '#627AAD');
 
-            update_mapping_choice($mlist);
-        }
-        if (!$mlist.find('.candidate').length)
-            fetch_match_list($mlist, fieldId, selectNextChoice);
-        else
-            selectNextChoice();
-    });
+    });	
 });
+
 
 $(reset_buttons).each( function () {
     var $container = $(this).parent().closest('tr');
     var $mlist = $container.find('.map-list');
 
-    // NB: should probably remove this as we no longer
-    // keep saved matches around.
-    if ($container.find('.choice.mapping').length)
-        return;
-
     $(this).click( function () {
 	$container.next().hide();
 	$container
             .removeClass('mapped')
+	    .removeClass('antimapped')
             .addClass('unmapped')
+
             .find('.match')
                 .find('.button')
                     .removeClass('disabled')
                 .end()
 	        .find('.choice')                //div that displays curr. choice
 	            .removeClass('new-mapping') //unmap
-                    .removeClass('mapping')
+	            .removeClass('new-antimapping')
 	            .data('confidence', 0)      //reset user's confidence rating
 	        .end()
 	    .end()
+
 	    .find('.status')
                 .removeClass('dirty')
 	        .text('unmapped')
@@ -248,6 +268,7 @@ function fetch_match_list(mlist, field_id, afterLoad) {
 		$('.selected').removeClass('selected');
 		$(this).addClass('selected');
 		update_mapping_choice(mlist);
+		$(mlist).closest('tr').find('.accept').click();
 	    });
             afterLoad();
         };
@@ -268,14 +289,17 @@ function update_mapping_choice (mlist) {
     var title = $(choice).attr('title');
     var target = $(choice).closest('tr').find('.choice');
 
-    $(target)
-        .text(name)
+   $(target)
+	.find('.match-name')
+        .text(name);
+
+   $(target)
         .attr('id', fromId + '-is-' + toId)
         .attr('data-original-title', title)
         .attr('title', title)
-	.closest('.match')
         .find('.score-color')
-	.css('background-color', borderColor)
+	   .css('background-color', borderColor)
+           .end()
         .end();
 
     update_score_tooltips();
@@ -332,19 +356,24 @@ $mapallButton.click(function () {
 });
 
 $saveButton.click(function () {
-    var answerer_id = 0,
-        mappings = [],
-        rejected = [];
+    var answerer_id = 0;
+    var mappings = [];
+    var rejected = [];
 
     var matchers = $('.map-list');
 
     // collect changes
     $('.new-mapping').each(function () {
-	mappings.push($(this).attr('id').split('-is-').concat([$(this).data('confidence')])); 
+	mappings.push(
+	    $(this).attr('id').split('-is-').concat([$(this).data('confidence')])
+	); 
     });
 
-    $('.rejected').each(function () {
-	rejected.push($(this).attr('id').split('-to-').concat([$(this).data('confidence')]));
+
+    $('.new-antimapping').each(function () {
+	rejected.push(
+	    $(this).attr('id').split('-is-').concat([$(this).data('confidence')])
+	);
     });
 
     // fetch data retrieved from expertsrc
@@ -372,21 +401,27 @@ $saveButton.click(function () {
 	           '&answerer_id=' + answerer_id,
             callback = function (d) {
 		$('.confidence').hide();
+
 		$('.new-mapping')
 		    .closest('.mapper-row')
 		    .addClass('hide')
                     .removeClass('new-mapping')
                     .addClass('mapping')
                     .removeAttr('style');
-		$('.rejected')
+
+		$('.new-antimapping')
 		    .closest('.mapper-row')
 		    .addClass('hide')
-		    .removeClass('rejected');
+		    .removeClass('.new-antimapping');
+
 		$('.dirty').each(function() {
 		    $(this).removeClass('dirty').addClass('committed');
 		});
+
 		update_save_button();
+
 		var msg = $('.msg').first();
+
 		if($('.mapper-row').length == $('.mapper-row.hide').length){
 		    $(msg)
 			.show()
@@ -509,8 +544,8 @@ function init_static_tooltips () {
 	placement:'right'});
     $('.actions').tooltip({
 	selector:'.btn-tooltip',
-	delay: {show: 750, hide:0 },
-	placement:'bottom'
+	delay: {show: 250, hide:0 },
+	placement:'top'
     });
 }
 
@@ -523,8 +558,9 @@ function reset_and_display_slider($container, $choice) {
     // $choice = the item that has been mapped or rejected
 
     $slider = $container.find('.confidence-slider');
-    $choice.data('confidence', 50);
-    $slider.slider("value", 50);
+    $choice.data('confidence', 0);
+    $slider.slider("value", 0);
+    $slider.closest('td').find('.confidence-text').text(0);
 
     // show the slider container
     $container.show();
@@ -541,10 +577,11 @@ function init_sliders() {
     $(".confidence-slider").slider({
         range: "min",
         value: init_value,
-        min: 50,
+        min: 0,
         max: 100,
         slide: function( event, ui ) {
-            $(event.target).data('confidence', ui.value)
+            $(event.target).data('confidence', ui.value);
+	    $(event.target).closest('td').find('.confidence-text').text(ui.value);
         }
     });
     $(".confidence-slider").data('confidence', init_value); 
