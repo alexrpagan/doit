@@ -76,7 +76,7 @@ body {margin:0;padding:0;}
     font-size:12pt;
     border-bottom:2px solid #BBB;
 }
-.pane.left {position:relative; float:left;width:268px;height:100%;border-right:2px solid #BBB; overflow:auto;}
+.pane.left {position:relative; float:left;width:400px;height:100%;border-right:2px solid #BBB; overflow:auto;}
 .pane.right {padding:0px;margin-top:0px;overflow:auto;}
 
 .data-nav {

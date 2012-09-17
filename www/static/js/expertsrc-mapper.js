@@ -163,12 +163,42 @@ $(reset_buttons).each( function () {
 function load_source(sourceId){
     var $window = $('.pane.right'),
     table = $('.viewTable');
+
+    var opts = {
+	  lines: 13, // The number of lines to draw
+	  length: 7, // The length of each line
+	  width: 4, // The line thickness
+	  radius: 10, // The radius of the inner circle
+	  corners: 1, // Corner roundness (0..1)
+	  rotate: 0, // The rotation offset
+	  color: '#000', // #rgb or #rrggbb
+	  speed: 1, // Rounds per second
+	  trail: 60, // Afterglow percentage
+	  shadow: false, // Whether to render a shadow
+	  hwaccel: false, // Whether to use hardware acceleration
+	  className: 'spinner', // The CSS class to assign to the spinner
+	  zIndex: 2e9, // The z-index (defaults to 2000000000)
+	  top: 'auto', // Top position relative to parent in px
+	  left: 'auto' // Left position relative to parent in px
+    };    
+
+    var target = document.getElementById('top-spin');
+    var status = document.getElementById('top-status');
+    var cont = document.getElementById('status-container');
+    var spinner = new Spinner(opts).spin(target);
+
+    $(status).text('Loading data source...');
+    $(cont).show();
+
     fetch_data_table(sourceId, function(data) {
 	table.replaceWith(data);
 	fetch_source_meta(sourceId, function(data) {
 	    $('.source-meta').replaceWith(data);
 	});
 	toggle_panel();
+
+	// clean up
+        $(cont).hide();
     });
 }
 
@@ -201,17 +231,17 @@ function toggle_panel(){
     }
 }
 
-function fetch_data_table (sourceId, callback) {
-    var rPath = /^\/doit\/\w+\//;
-    var basePath = rPath.exec(location.pathname).toString();
-    var url = basePath + 'sources/' + sourceId + '/table';
-    $.get(url, {}, callback);
-}
-
 function fetch_source_meta (sourceId, callback) {
     var rPath = /^\/doit\/\w+\//;
     var basePath = rPath.exec(location.pathname).toString();
     var url = basePath + 'sources/' + sourceId + '/meta';
+    $.get(url, {}, callback);
+}
+
+function fetch_data_table (sourceId, callback) {
+    var rPath = /^\/doit\/\w+\//;
+    var basePath = rPath.exec(location.pathname).toString();
+    var url = basePath + 'sources/' + sourceId + '/table';
     $.get(url, {}, callback);
 }
 
@@ -608,10 +638,12 @@ function reset_and_display_slider($container, $choice) {
     // $container = the tr containing the confidence slider
     // $choice = the item that has been mapped or rejected
 
+    var init_value = 50;
+
     $slider = $container.find('.confidence-slider');
-    $choice.data('confidence', 0);
-    $slider.slider("value", 0);
-    $slider.closest('td').find('.confidence-text').text(0);
+    $choice.data('confidence', init_value);
+    $slider.slider("value", init_value);
+    $slider.closest('td').find('.confidence-text').text(init_value);
 
     // show the slider container
     $container.show();
@@ -624,7 +656,9 @@ function reset_and_display_slider($container, $choice) {
 }
 
 function init_sliders() {
-    var init_value = 0;
+
+    var init_value = 50;
+
     $(".confidence-slider").slider({
         range: "min",
         value: init_value,
