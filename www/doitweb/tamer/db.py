@@ -3,7 +3,7 @@ import copy
 import cPickle
 import re
 from operator import itemgetter
-
+from django.conf import settings
 from protocol import expertsrc_pb2
 from protocol.batchqueue import BatchQueue
 
@@ -28,8 +28,10 @@ class TamerDB:
 
     def __init__(self, dbname):
         if self.conn is None:
-            self.conn = psycopg2.connect(database=dbname, user='apagan',
-                                         password='12345', host='localhost')
+            self.conn = psycopg2.connect(database=dbname, 
+                                         user=settings.DATABASES['default']['USER'],
+                                         password=settings.DATABASES['default']['PASSWORD'],
+                                         host=settings.DATABASES['databases']['HOST'])
         name = dbname
 
     def source_list(self, n):
