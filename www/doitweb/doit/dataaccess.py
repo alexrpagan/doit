@@ -30,7 +30,7 @@ class DoitDB:
             self.conn = psycopg2.connect(database=dbname, 
                                          user=settings.DATABASES['default']['USER'],
                                          password=settings.DATABASES['default']['PASSWORD'],
-                                         host=settings.DATABASES['databases']['HOST'])
+                                         host=settings.DATABASES['default']['HOST'])
 
     def sources(self):
         cur = self.conn.cursor()
