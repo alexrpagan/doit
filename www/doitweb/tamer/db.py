@@ -6,6 +6,9 @@ from operator import itemgetter
 from django.conf import settings
 from protocol import expertsrc_pb2
 from protocol.batchqueue import BatchQueue
+import logging
+
+logger = logging.getLogger(__name__)
 
 # convert float (0 to 1) to 8 bit web color (e.g. 00 to ff)
 def f2c(x):
@@ -192,6 +195,14 @@ class TamerDB:
                 % (a, a, a)
             cur.execute(cmd, (a,))
 
+        cmd = '''SELECT DISTINCT sid::INTEGER FROM import_tmp;'''
+        cur.execute(cmd)
+        for r in cur.fetchall():
+            logger.info('sid -> %s', r[0])
+            cmd = '''INSERT INTO local_source_meta (source_id, meta_name, value) 
+                     VALUES (%s, 'expertsrc_domain', 'data-tamer')'''
+            cur.execute(cmd, (r[0],)) 
+
         # Preprocess source(s) for map and dedup
         cmd = '''SELECT DISTINCT sid::INTEGER FROM import_tmp;'''
         cur.execute(cmd)
@@ -306,14 +317,21 @@ class TamerDB:
         global_attributes = self.dictfetchall(cur)
         batch_obj = expertsrc_pb2.QuestionBatch()
         batch_obj.type = expertsrc_pb2.QuestionBatch.SCHEMAMAP
+        # TODO: make sure to grab this from auth service using provided cookie
         batch_obj.asker_name = 'data-tamer'
-        cmd = "SELECT local_id from local_sources where id = %s"
+        cmd = """SELECT local_id, value 
+                 FROM local_sources ls, local_source_meta lsm 
+                 WHERE ls.id = %s and lsm.source_id = ls.id and 
+                       lsm.meta_name = 'expertsrc_domain'"""
         cur.execute(cmd, (sourceid,))
-        batch_obj.source_name = cur.fetchone()[0]
+        source_name, domain_name = cur.fetchone() 
+        logger.info('source_name -> %s' % source_name)
+        logger.info('domain_name -> %s' % domain_name)
+        batch_obj.source_name = source_name
         batch = BatchQueue('question', batch_obj)
         for fid in mappings.keys():
             question = batch.getbatchobj().question.add()
-            question.domain_name = 'data-tamer'
+            question.domain_name = domain_name 
             question.local_field_id = fid
             question.local_field_name = mappings[fid]['name']
             choices = mappings[fid]['matches']
@@ -327,6 +345,8 @@ class TamerDB:
                     choice.confidence_score = c['score']
                     ids.append(c['id'])
                     choice_count -= 1
+            # uncomment this if you want to add all global attributes as
+            # potential choices.
             # id_set = set(ids)
             # for a in global_attributes:
             #     if a['id'] not in id_set:
