@@ -66,16 +66,16 @@ class DoitDB:
         return source_list
 
     def process_source(self, source_id, method_index):
-	cur = self.conn.cursor()
-	methods = ['nr', 'qgrams', 'dist', 'mdl', 'ngrams']
-	method_name = methods[int(method_index)]
-	if method_name == 'nr':
-	    cur.execute('SELECT nr_composite_load();')
-	else:
-	    cmd = 'SELECT ' + method_name + '_results_for_source(%s);'
-	    cur.execute(cmd, (source_id,))
-	self.conn.commit()
-	return method_name
+        cur = self.conn.cursor()
+        methods = ['nr', 'qgrams', 'dist', 'mdl', 'ngrams']
+        method_name = methods[int(method_index)]
+        if method_name == 'nr':
+            cur.execute('SELECT nr_composite_load();')
+        else:
+            cmd = 'SELECT ' + method_name + '_results_for_source(%s);'
+            cur.execute(cmd, (source_id,))
+        self.conn.commit()
+        return method_name
 
     def source_fields(self, source_id):
         cur = self.conn.cursor()
@@ -117,64 +117,64 @@ class DoitDB:
         cmd = '''SELECT meta_name, value FROM local_source_meta
                   WHERE source_id = %s
                ORDER BY meta_name DESC;'''
-	cur.execute(cmd, (source_id,))
-	metadata = []
-	for rec in cur.fetchall():
+        cur.execute(cmd, (source_id,))
+        metadata = []
+        for rec in cur.fetchall():
             metadata.append({'name': rec[0], 'value': rec[1]})
-	return metadata
+        return metadata
 
     def field_meta(self, field_id):
-	cur = self.conn.cursor()
-	cmd = 'SELECT meta_name, value FROM local_field_meta ' \
+        cur = self.conn.cursor()
+        cmd = 'SELECT meta_name, value FROM local_field_meta ' \
               ' WHERE field_id = %s;'
-	cur.execute(cmd, (field_id,))
-	metadata = []
-	for rec in cur.fetchall():
-		metadata.append({'name': rec[0], 'value': rec[1]})
-	cmd = 'SELECT local_id, local_name, local_desc ' \
+        cur.execute(cmd, (field_id,))
+        metadata = []
+        for rec in cur.fetchall():
+                metadata.append({'name': rec[0], 'value': rec[1]})
+        cmd = 'SELECT local_id, local_name, local_desc ' \
               '  FROM local_fields WHERE id = %s;'
-	cur.execute(cmd, (field_id,))
-	rec = cur.fetchone()
-	metadata.insert(0, {'name': 'Description', 'value': rec[2]})
-	metadata.insert(0, {'name': 'ID', 'value': rec[0]})
-	metadata.insert(0, {'name': 'Name', 'value': rec[1]})
-	return metadata
+        cur.execute(cmd, (field_id,))
+        rec = cur.fetchone()
+        metadata.insert(0, {'name': 'Description', 'value': rec[2]})
+        metadata.insert(0, {'name': 'ID', 'value': rec[0]})
+        metadata.insert(0, {'name': 'Name', 'value': rec[1]})
+        return metadata
 
     def create_mappings(self, pairs, anti=False, answerer_id=0, answerer_auth=0.5):
         if len(pairs) == 0:
             return
         cur = self.conn.cursor()
-	params = []
+        params = []
         batch_obj = expertsrc_pb2.AnswerBatch()
         batch_obj.type = expertsrc_pb2.AnswerBatch.SCHEMAMAP
         batch = BatchQueue('answer', batch_obj)
-	cmd = 'INSERT INTO attribute_mappings (' \
+        cmd = 'INSERT INTO attribute_mappings (' \
               '    local_id, global_id, confidence, authority, who_created, ' \
               '    when_created, why_created) ' \
               'VALUES '
         if anti: cmd = cmd.replace('mappings', 'antimappings')
         for local_id, global_id, conf in pairs:
             cmd = cmd + '(%s, %s, %s, %s, %s, NOW(), %s), '
-	    params.append(local_id)
-	    params.append(global_id)
-            params.append(conf/100.0)
+            params.append(local_id)
+            params.append(global_id)
+            params.append(int(conf)/100.0)
             params.append(answerer_auth)
-	    params.append(answerer_id)
-	    params.append("Expertsrc")
+            params.append(answerer_id)
+            params.append("Expertsrc")
 
             # register answers with expertsrc
             answer = batch.getbatchobj().answer.add()
             answer.answerer_id = answerer_id 
-            answer.confidence = conf/100.0
+            answer.confidence = int(conf)/100.0
             answer.authority = answerer_auth
             answer.global_attribute_id = int(global_id)
             answer.local_field_id = int(local_id)
             answer.is_match = not anti
         batch.enqueue()
-	cmd = cmd[0:-2] + ';'
-	cur.execute(cmd, params)
-	self.conn.commit()
-	return str([cmd, params])
+        cmd = cmd[0:-2] + ';'
+        cur.execute(cmd, params)
+        self.conn.commit()
+        return str([cmd, params])
 
     def new_attribute(self, ref_id, suggestion, username, comment):
         cur = self.conn.cursor()
@@ -413,27 +413,27 @@ class DoitDB:
 
     def lowscorers(self, n):
         pass
-#	    cur = self.conn.cursor()
-#	    cur.execute('SELECT a.name, b.id as match_id, b.name as match, a.score, a.source_id ' +
-#			  'FROM dan.nr_ncomp_results_tbl a, dan.global_attributes b, ' +
-#			       '(SELECT source_id, name FROM dan.nr_ncomp_max_results ORDER BY score ASC LIMIT %s) c ' +
-#			 'WHERE a.match = b.id ' +
-#			   'AND a.source_id = c.source_id AND a.name = c.name ' +
-#		      'ORDER BY score desc;', (n,))
+#            cur = self.conn.cursor()
+#            cur.execute('SELECT a.name, b.id as match_id, b.name as match, a.score, a.source_id ' +
+#                          'FROM dan.nr_ncomp_results_tbl a, dan.global_attributes b, ' +
+#                               '(SELECT source_id, name FROM dan.nr_ncomp_max_results ORDER BY score ASC LIMIT %s) c ' +
+#                         'WHERE a.match = b.id ' +
+#                           'AND a.source_id = c.source_id AND a.name = c.name ' +
+#                      'ORDER BY score desc;', (n,))
 #
-#	    scores = dict()
-#	    for rec in cur.fetchall():
-#		    scores.setdefault(unicode(rec[4]) + ': ' +  rec[0], [])
-#		    scores[unicode(rec[4]) + ': ' + rec[0]].append((rec[2], rec[1], rec[3], f2c(rec[3]/3.0), f2c(1.0 - rec[3]/4.0)))
+#            scores = dict()
+#            for rec in cur.fetchall():
+#                    scores.setdefault(unicode(rec[4]) + ': ' +  rec[0], [])
+#                    scores[unicode(rec[4]) + ': ' + rec[0]].append((rec[2], rec[1], rec[3], f2c(rec[3]/3.0), f2c(1.0 - rec[3]/4.0)))
 #
-#	    return scores
+#            return scores
 
 
     def fieldname(self, field_id):
-	    cur = self.conn.cursor()
-	    cmd = 'SELECT local_name FROM local_fields WHERE id = %s'
-	    cur.execute(cmd, (field_id,))
-	    return cur.fetchone()[0]
+            cur = self.conn.cursor()
+            cmd = 'SELECT local_name FROM local_fields WHERE id = %s'
+            cur.execute(cmd, (field_id,))
+            return cur.fetchone()[0]
 
     def fieldsource(self, field_id):
         cur = self.conn.cursor()
@@ -444,34 +444,34 @@ class DoitDB:
 
     # get metadata about a given field
     def fieldmeta(self, field_id):
-	    cur = self.conn.cursor()
-	    cmd = 'SELECT * FROM local_field_meta WHERE field_id = %s;'
-	    cur.execute(cmd, (field_id,))
-	    # TODO: fetch the results...
-	    return None
+            cur = self.conn.cursor()
+            cmd = 'SELECT * FROM local_field_meta WHERE field_id = %s;'
+            cur.execute(cmd, (field_id,))
+            # TODO: fetch the results...
+            return None
 
     # example values from a local data field
     def fieldexamples(self, field_id, n, distinct=True):
-	cur = self.conn.cursor()
-	cmd = 'SELECT value FROM local_mdl_dictionaries ' \
+        cur = self.conn.cursor()
+        cmd = 'SELECT value FROM local_mdl_dictionaries ' \
               ' WHERE field_id = %s ORDER BY random() LIMIT %s;'
-	cur.execute(cmd, (int(field_id), int(n)))
-	values = []
-	for rec in cur.fetchall():
-		values.append(rec[0])
-	return values
+        cur.execute(cmd, (int(field_id), int(n)))
+        values = []
+        for rec in cur.fetchall():
+                values.append(rec[0])
+        return values
 
 
     # example values from a global attribute
     def globalfieldexamples(self, att_id, n, distinct=True):
-	cur = self.conn.cursor()
-	cmd = 'SELECT value FROM global_mdl_dictionaries ' \
+        cur = self.conn.cursor()
+        cmd = 'SELECT value FROM global_mdl_dictionaries ' \
               ' WHERE att_id = %s ORDER BY random() LIMIT %s;'
-	cur.execute(cmd, (int(att_id), int(n)))
-	values = []
-	for rec in cur.fetchall():
-		values.append(rec[0])
-	return values
+        cur.execute(cmd, (int(att_id), int(n)))
+        values = []
+        for rec in cur.fetchall():
+                values.append(rec[0])
+        return values
 
     # get a list of values shared by a local field and global attribute
     def sharedvalues(self, field_id, att_id, n=10):
@@ -492,9 +492,9 @@ class DoitDB:
         r = random.randint(1, 10000) # <-- TODO: replace with rand!
         cmd = 'DROP TABLE IF EXISTS tmp_egs__%s;'\
               'CREATE TEMP TABLE tmp_egs__%s AS ' \
-	      '     SELECT field_id, value, random() r ' \
+              '     SELECT field_id, value, random() r ' \
               '       FROM local_mdl_dictionaries ' \
-	      '      WHERE source_id = %s AND value IS NOT NULL' \
+              '      WHERE source_id = %s AND value IS NOT NULL' \
               '      LIMIT 10000; ' \
               'SELECT a.field_id, a.value ' \
               '  FROM tmp_egs__%s a, (SELECT field_id, MAX(r) r ' \
@@ -541,7 +541,7 @@ class DoitDB:
                    FROM public.entity_pair_queue 
                   WHERE human_label IS NULL 
                ORDER BY priority DESC 
-                  LIMIT 1;'''		  
+                  LIMIT 1;'''                  
         cur.execute(cmd)
         rec = cur.fetchone()
         e1, e2, s = rec

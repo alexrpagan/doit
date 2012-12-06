@@ -199,7 +199,7 @@ body {margin:0;padding:0;}
 
 
 .score-color {
-    margin:0px;
+    margin:auto;
     padding:0px;
     border-radius:4px;
     width:30px;
@@ -223,6 +223,8 @@ body {margin:0;padding:0;}
 
 .mapper .actions {width:130px;}
 .mapper .status {width:70px;}
+
+.match-strength {width:70px;}
 
 .control {padding:8px 16px;font-style:normal;cursor:pointer;}
 .disabled.button {background-color:#DDDDDD;}

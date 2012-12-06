@@ -35,13 +35,15 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 	 type="hidden" 
 	 data-answerer-id="{{answerer_id}}" 
 	 data-page-size="{{page_size}}"
-	 data-expertsrc-url="{{expertsrc_url}}"/>
+	 data-expertsrc-url="{{expertsrc_url}}"
+     data-domain-id="{{domain_id}}"/>
 
   <div class="pane top well">
     <table style="width:100%;">
       <tr>
         <td class="title">
-	  <div class="current-source lead hide">
+	  <div class="curr-source lead">
+        {{source_name}}
 	  </div>
 	</td>
 
@@ -94,94 +96,13 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
       <span class="msg-text"></span>
     </div>
 
-    <div class="help well help-top hide" title="Click anywhere to hide help.">
-      <div class="help-inner">
-	<br />
-	<h1>Help us integrate Pharon assay data</h1>
-	<hr />
-	<div class="main-copy">
-	  <p class="lead">
-	    Below, you will be shown pairs of data attributes. 
-	  </p>
-	  <p class="lead">
-	  These are mappings which have been automatically generated between assay data attributes and attributes in a global schema by an ensemble of schema matching algorithms. The matches shown below are those rated 'most similar' by our algorithms. 
-	  </p>
-	  <p class="lead">
-	    We need your help to determine whether these matches are correct!
-	  </p>
-	  <hr />
-	  <p class="lead">
-	    What you do:
-	  </p>
-	  <ul class="instructions">
-	    <li>
-	      You will evaluate groups of 10 matches at a time. If you have been assigned more than 10 matches, then the next batch will appear when your answers have been saved.
-	    </li>
-	    <li>
-	      Indicate whether you believe the pair <b>is</b> or <b>isn't</b> a match by pressing the <i class="icon-search icon-ok"></i> or <i class="icon-search icon-remove"></i> button. 
-	      <div class="alert nb alert-info">
-		<b>NB:</b> You may not always be able to determine whether or not the pair is a match. This is <b>OK</b>. Just give your best guess and indicate how sure you are using the confidence slider that appears after you make a decision.
-	      </div>
-	    </li>
-	    <li>
-	      If you change your mind, you can use the <i class="icon-search icon-refresh"></i> button to reset the match to what we originally suggested. 
-	      <div class="alert nb alert-info">
-		<b>NB:</b> After you press "Save" your answer is final!
-	      </div>
-	    </li>
-	    <li>
-	      You can navigate back to Expertsrc at any time by pressing the "Done" button.
-	    </li>
-	    <li>
-	      You can view this information at any time by pressing the "Help" button. You can also mouse over the components of the mapping interface to get hints.
-	    </li>
-	  </ul>
-	  <hr />
-	  <p class="lead">What you're given:</p>
-
-	  <dl class="dl-horizontal">
-
-	    <dt>Our Score</dt>
-	    <dd>
-	      The colored block between the assay attribute and the global attribute represents our algorithms' estimation of match strength. <span class="label label-success">Green</span> indicates a strong match and <span class="label label-important">Red</span> indicates a weak match.
-	    </dd>
-	    <br />
-	    <dt>Other Matches</dt>
-	    <dd>You can select a different global attribute by pressing the <i class="icon-search icon-plus"></i> button.</dd>
-	    <br />
-	    <dt>The Data</dt>
-	    <dd>Press the <i class="icon-search icon-info"></i> button to get more information. You can either view the data source of the attribute being mapped or see more details about the match. (e.g., compare data values of assay and global attributes). </dd>
-         </dl>
-	  <hr />
-	  <p class="lead">
-	    Caveats:
-	  </p>
-	  <ul class="instructions">
-	    <li>
-	      Note that the assay data attributes on the page might not be from the same source. 
-	      <div class="alert nb alert-info">
-		<b>NB:</b> Make sure that you view the data attribute's source before making a decision!
-	      </div>
-	    </li>
-	  </ul>
-        </div>
-	<br />
-	<div class="fixed-bottom">
-	  <hr />
-	  <p class="lead">
-	    Scroll down to see matching interface <i class="icon-search icon-arrow-down" style="margin-top:5px;"></i>
-	  </p>
-	</div>
-      </div>
-      <div class="nix-help-button">
-	<a href="#" class="btn btn-large btn-primary">Hide help</a>
-      </div>
-    </div>
+    {% include "doit/help.html" %}
 
     <table class="mapper table">
 	<tr>
-	  <th class="attr header-left lead">Data Attribute</th>
-	  <th class="match header lead">Suggested Matches</th>
+	  <th class="attr header-left lead">Local Data Attribute</th>
+      <th class="match-strength header lead">Match Strength</th>
+	  <th class="match header lead">Suggested Global Match</th>
 	  <th class="actions header lead">Actions</th>
 	  <th class="status header-right lead">Status</th>
 	</tr>
@@ -197,27 +118,35 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 	    </div>
 	    -->
 	    <div class="tooltip-container source-name"> 
-	      <div class="attr-name" rel="tooltip" title="From data source: '{{attr.source_name}}'">
+	      <div class="attr-name" title="From data source: '{{attr.source_name}}'">
 		{{ attr.name }}
 	      </div>
 	    </div>
 
 	  </div>
 	</td>
+    
+    <td>
+		<div class="score-color" style="background-color:#{{ attr.match.red }}{{ attr.match.green }}44;">
+		</div>
+    </td>
 
 	<td class="match">
 	  <div class="row">
 	    <div class="tooltip-container score">
               <div class="choice" rel="tooltip" id="{{ attr.id }}-is-{{ attr.match.id }}"
-	    	   title="{{ attr.match.score|floatformat }} out of 4.0">
-
-		<div class="score-color pull-left" style="background-color:#{{ attr.match.red }}{{ attr.match.green }}44;">
-		</div>
+	    	   title="Estimated match strength: {{ attr.match.score|floatformat }} out of 4.0">
 
 		<div class="match-name" style="padding-top:5px;">
 		  {{ attr.match.name }}
 		</div>
-              </div>
+        <span class="dropdown per-row-actions">
+  	    <a id="choice-drop-{{attr.id}}" class="drop dropdown-toggle btn-tooltip" role="button" data-toggle="dropdown" data-target="#" title="Select a different global attribute"><small>+ more matches</small></a>
+	       <div class="dropdown-menu map-list-cont"  aria-labeledby="choice-drop-{{attr.id}}" role="menu">
+		        <div class="filter" style="margin:5px;"><input type="text" placeholder="Filter..."></input></div>
+		        <ul class="map-list"></ul>
+	       </div>
+        </span>
 	    </div>
 	  </div>
 	</td>
@@ -231,13 +160,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 	     <span class="dropdown btn-group per-row-actions">
 	       <span class="btn btn-tooltip accept" title="This match is correct"><i class="icon-search icon-ok"></i></span>
 	       <span class="btn btn-tooltip reject" title="This is not a valid match!"><i class="icon-search icon-remove"></i></span>
-	       <span id="choice-drop-{{attr.id}}" class="drop btn dropdown-toggle btn-tooltip" role="button" data-toggle="dropdown" data-target="#" title="Map a different global attribute"><i class="icon-search icon-plus"></i></span>
-	       <div class="dropdown-menu map-list-cont"  aria-labeledby="choice-drop-{{attr.id}}" role="menu">
-		 <div class="filter" style="margin:5px;"><input type="text" placeholder="Filter..."></input></div>
-		 <ul class="map-list"></ul>
-	       </div>
-	       <!--<span class="btn btn-tooltip dont-know" title="Not enough information to answer"><i class="icon-search icon-question-sign"></i></span>-->
-	     </span> 
+     </span> 
 	     
 	     <span class="btn-group per-row-actions">
 	       <span class="btn btn-tooltip reset" title="Reset match"><i class="icon-search icon-refresh"></i></span>
@@ -257,12 +180,28 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  	<td class="status">unmapped</td>
      </tr>
       <tr class="confidence well hide">
+    <td></td>
 	<td></td>
-	<td></td>
+	<td>
+        <p style="padding-top:12px;">
+            Indicate how confident you feel in your answer:
+        </p>
+    </td>
 	<td class="actions">
-	  <p title="How confident are you in your answer?">
-	    Confidence: <span class="lead"> <span class="confidence-text">0</span>%</span></p>
-          <div class="confidence-slider" data-confidence=""></div>
+        <p title="How confident do you feel about your answer?">
+          <div class="confidence-btns" data-confidence="66">
+          <form>
+            <label class="radio inline low">
+                <input type="radio" name="conf" value="33"> Low
+            </label>
+            <label class="radio inline med">
+                <input type="radio" name="conf" value="66"> Medium
+            </label> 
+            <label class="radio inline high">
+                <input type="radio" name="conf" value="99"> High
+            </label>
+          </form>
+          </div>
 	</td>
 	<td><a href="#" class="btn btn-large done-with-confidence">OK</a></td>
       </tr>

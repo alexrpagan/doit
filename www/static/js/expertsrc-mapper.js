@@ -33,7 +33,7 @@ var actions = $('.actions');
 var accept_buttons = $('.accept', actions);
 var reject_buttons = $('.reject', actions);
 var reset_buttons  = $('.reset',  actions);
-var dropdown_buttons = $('.drop', actions);
+var dropdown_buttons = $('.drop');
 
 var viewsource_buttons = $('.viewsource');
 
@@ -270,7 +270,7 @@ $('.toggle-data-panel').each(
 /* match list dropdowns */
 
 $(dropdown_buttons).each(function() {
-    var list = $(this).closest('.btn-group').find('.map-list');
+    var list = $(this).closest('.per-row-actions').find('.map-list');
     $(this).click(function(e) {
 	if($(this).is('.disabled')){
 	    return;
@@ -411,16 +411,17 @@ $saveButton.click(function () {
     var answerer_id = $(page_data).data('answerer-id');
     var page_size = $(page_data).data('page-size');
     var expertsrc_url = $(page_data).data('expertsrc-url');
+    var domain_id = $(page_data).data('domain-id');
 
     var any_changed = (mappings.length + rejected.length) > 0;
     
     if(!any_changed) {
-	return;
+	    return;
     }
     
     var msg = 
-	"After you save your answers, there is no way to alter them. " +
-	"Are you sure that you want to do this?";
+	"After you save your answers, you cannot alter them. " +
+	"Are you sure?";
 
     var save_anyway = confirm(msg);
 
@@ -430,19 +431,20 @@ $saveButton.click(function () {
                    '&rejects=' + JSON.stringify(rejected) +
 	           '&answerer_id=' + answerer_id,
             callback = function (d) {
+
 		$('.confidence').hide();
 
-		$('.new-mapping')
-		    .closest('.mapper-row')
-		    .addClass('hide')
-                    .removeClass('new-mapping')
-                    .addClass('mapping')
-                    .removeAttr('style');
+		$('.new-mapping').each(function() {
+		    $(this).removeClass('new-mapping')
+            .closest('.mapper-row')
+		    .addClass('hide');
+        });
 
-		$('.new-antimapping')
-		    .closest('.mapper-row')
-		    .addClass('hide')
-		    .removeClass('.new-antimapping');
+		$('.new-antimapping').each(function() {
+		    $(this).removeClass('new-antimapping')
+            .closest('.mapper-row')
+		    .addClass('hide');
+        });
 
 		$('.dirty').each(function() {
 		    $(this).removeClass('dirty').addClass('committed');
@@ -460,7 +462,8 @@ $saveButton.click(function () {
 		    setTimeout(function () {
 			$(msg).hide('fade');
 			// TODO: push items out of the queue before doing this...
-			window.location = expertsrc_url + '/answer/next_question';
+            // TODO add domain id to this crap
+			window.location = expertsrc_url + '/answer/' + domain_id + '/next_question';
 		    }, 1500);
 		} else {
 		    $(msg)
@@ -488,61 +491,6 @@ $backButton.click(function() {
 	window.location = url;
     }
 });
-
-
-
-
-/* help */
-
-// function help_sequence() {
-//     var pop_class = 'help-popover';
-//     var pop_sel = 'div.' + pop_class;
-//     var next_btn = "<hr/><span class='btn btn-primary next-help pull-right'>Continue</span>"
-
-//     var next_action = function () {
-// 	$(pop_sel).popover('destroy');
-// 	if(help_fcns.length)
-// 	    (help_fcns.shift())();
-// 	else
-// 	    alert('Done!');
-//     }
-
-//     var help_fcns = [];
-    
-//     help_fcns.push(function () {
-// 	console.log('in here!');
-
-// 	msg = "This is the name of a data attribute that we need to map. It may contain the same type of data as one of the attributes in our global schema." + next_btn
-
-
-// 	var target = $('.attr-name').first();
-
-// 	$(target).addClass('.help-popover');
-// 	$(target).attr('title', 'Test');
-// 	$(target).data('original-content', msg);
-
-// 	target.popover({
-// 	    trigger: 'manual',
-// 	    selector: '.help-popover'
-// 	});
-	
-// 	$('.next-help').click(next_action);
-	
-// 	$('.help-popover').popover('show');
-//     });
-	
-//     // explain global attribute name
-
-//     // explain score
-
-//     // explain actions panel
-
-//     // explain confidence bar
-
-//     // explain info button
-    
-//     (help_fcns.shift())();
-// }
 
 
 function init_help() {
@@ -611,7 +559,7 @@ function fill_popover (url, width, callback) {
 /* tooltips */
 
 function update_score_tooltips () {
-    $('.tooltip-container.score').tooltip({selector:'div[rel=tooltip]', placement:'left'});
+//    $('.tooltip-container.score').tooltip({selector:'div[rel=tooltip]', placement:'left'});
 }
 
 function init_static_tooltips () {
@@ -638,40 +586,36 @@ function reset_and_display_slider($container, $choice) {
     // $container = the tr containing the confidence slider
     // $choice = the item that has been mapped or rejected
 
-    var init_value = 50;
+    var init_value = 66;
 
-    $slider = $container.find('.confidence-slider');
+    $btns = $container.find('.confidence-btns');
+    $btns.find('input:radio[value='+init_value+']').attr('checked', 'checked');
     $choice.data('confidence', init_value);
-    $slider.slider("value", init_value);
-    $slider.closest('td').find('.confidence-text').text(init_value);
 
     // show the slider container
     $container.show();
     var done_btn = $container.find('.done-with-confidence');
 
     $(done_btn).unbind().click(function(){
-	$choice.data('confidence', $slider.slider('value'));
-	$container.hide();
+	    $choice.data('confidence', $container.find(":radio:checked").first().val());
+	    $container.hide();
     });
-}
+}    
 
-function init_sliders() {
-
-    var init_value = 50;
-
-    $(".confidence-slider").slider({
-        range: "min",
-        value: init_value,
-        min: 0,
-        max: 100,
-        slide: function( event, ui ) {
-            $(event.target).data('confidence', ui.value);
-	    $(event.target).closest('td').find('.confidence-text').text(ui.value);
+function init_conf_btns() {
+    var init_value = 66;
+    $("input:radio[name=conf]").each(
+    function() {
+        if ($(this).val() == init_value){
+            $(this).attr('checked', 'checked');
         }
+        $(this).click(
+            function () {
+                $(this).closest('.confidence-btns').data('confidence', $(this).val());
+            }
+        );
     });
-    $(".confidence-slider").data('confidence', init_value); 
 }
-
 
 
 
@@ -697,7 +641,7 @@ function init_page() {
     init_help();
     update_score_tooltips();
     init_static_tooltips();
-    init_sliders();
+    init_conf_btns();
 }
 
 $(function() {

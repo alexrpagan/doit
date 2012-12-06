@@ -59,26 +59,31 @@ def auth_user(answerer_id, fields):
 	return True
 
 def mapper_by_field_set(req, dbname):
-	db = DoitDB(dbname)
-	answerer_id = req.GET.get('answerer_id', False)
-	fields = req.GET.get('fields', False)
-	assert all((fields, answerer_id, auth_user(answerer_id, fields),))
-
-        # hack to make sure that ids are really ints
-        # this should raise an integer parse error if the ids are
-        # tampered with.
-        field_ids = map(int, fields.split(','))
-	field_mappings = db.field_mappings_by_id_list(field_ids=field_ids, 
+    db = DoitDB(dbname)
+    answerer_id = req.GET.get('answerer_id', False)
+    fields = req.GET.get('fields', False)
+    domain_id = req.GET.get('domain_id', False)
+    assert all((fields, answerer_id, domain_id, auth_user(answerer_id, fields),))
+    # hack to make sure that ids are really ints
+    # this should raise an integer parse error if the ids are
+    # tampered with.
+    field_ids = map(int, fields.split(','))
+    field_mappings = db.field_mappings_by_id_list(field_ids=field_ids, 
 						      answerer_id=answerer_id)
 
-	attr_list = sorted(field_mappings.values(), key=lambda f: f['match']['score'], reverse=True)
+    attr_list = sorted(field_mappings.values(), key=lambda f: f['match']['score'], reverse=True)
+    source_name = ''
+    if len(attr_list) > 0:
+        # we assume that all mappings are from same source
+        source_name = attr_list[0]['source_name']
+    c = {'source_name': source_name,
+         'attr_list': attr_list,
+         'expertsrc':True,
+         'expertsrc_url':settings.EXPERTSRC_URL,
+         'answerer_id': answerer_id,
+         'domain_id': domain_id }
 
-	c = {'attr_list': attr_list,
-	     'expertsrc':True,
-	     'expertsrc_url':settings.EXPERTSRC_URL,
-	     'answerer_id': answerer_id }
-
-	return render_to_response('doit/expertsrc-mapper.html', c)
+    return render_to_response('doit/expertsrc-mapper.html', c)
 
 def source_meta(req, dbname, sid):
     db = DoitDB(dbname)
