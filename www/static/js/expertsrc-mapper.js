@@ -107,6 +107,7 @@ $(reject_buttons).each(function () {
 	    .text('rejected');
 
 	$container
+        .closest('tr')
 	    .find('.score-color')
 	    .css('background-color', '#627AAD');
 
@@ -327,9 +328,10 @@ function update_mapping_choice (mlist) {
         .attr('id', fromId + '-is-' + toId)
         .attr('data-original-title', title)
         .attr('title', title)
+        .closest('tr')
         .find('.score-color')
-	   .css('background-color', borderColor)
-           .end()
+	    .css('background-color', borderColor)
+        .end()
         .end();
 
     update_score_tooltips();
