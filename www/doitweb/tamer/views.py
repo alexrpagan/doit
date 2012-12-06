@@ -143,7 +143,7 @@ def nav_items(db):
     n = {'title': 'Map Schema', 'subitems': [
         {'content': s['name'], 'target': 'source-' + str(s['id']) + '-map',
          'redirect': 'redirect'}
-        for s in db.source_list(20)]}
+        for s in db.source_list(30)]}
     navitems.append(n)
 
     # Dedup
