@@ -1,10 +1,18 @@
 $(function() {
 
-    /* Where are we? */
-    var baseURL = '/tamer/goby/';
+    function quote(str) {
+        return str.replace(/(?=[\/\\^$*+?.()|{}[\]])/g, "\\");
+    }
 
+    if(!url_prefix){
+        url_prefix = ''
+    }
+
+    var rPath = new RegExp("^" + quote(url_prefix) + "\\/tamer\\/\\w+\\/");
+    var baseURL = rPath.exec(location.pathname).toString();
 
     /* Nav bar funcionality */
+
     var $nav = $('.tamer-console-nav'),
         $new = $nav.find('.new');
 
@@ -130,8 +138,8 @@ $(function() {
 
             $radio.each(function () {
                 var $this = $(this),
-                    url = baseURL + 'widgets/attribute-radio',
-                    data = {'tablename': tableName, 'name': $this.attr('name')},
+                        url = baseURL + 'widgets/attribute-radio',
+                        data = {'tablename': tableName, 'name': $this.attr('name')},
                     callback = function () {};
 
                  if (tableName)

@@ -1,5 +1,14 @@
 $(function() {
-    var rPath = /^\/doit\/\w+\//;
+
+    function quote(str) {
+        return str.replace(/(?=[\/\\^$*+?.()|{}[\]])/g, "\\");
+    }
+
+    if(!url_prefix){
+        url_prefix = ''
+    }
+
+    var rPath = new RegExp("^" + quote(url_prefix) + "\\/doit\\/\\w+\\/");
     var basePath = rPath.exec(location.pathname).toString();
 
     /* layout */
@@ -206,15 +215,11 @@ $(function() {
     }
 
     function fetch_source_meta (sourceId, callback) {
-        var rPath = /^\/doit\/\w+\//;
-        var basePath = rPath.exec(location.pathname).toString();
         var url = basePath + 'sources/' + sourceId + '/meta';
         $.get(url, {}, callback);
     }
 
     function fetch_data_table (sourceId, callback) {
-        var rPath = /^\/doit\/\w+\//;
-        var basePath = rPath.exec(location.pathname).toString();
         var url = basePath + 'sources/' + sourceId + '/table';
         $.get(url, {}, callback);
     }
