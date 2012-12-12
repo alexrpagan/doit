@@ -4,7 +4,7 @@ import re
 from doit.util import bucketize
 from tamer.db import TamerDB
 from operator import itemgetter, attrgetter
-from django.shortcuts import render_to_response
+from django.shortcuts import render_to_response, render
 from django.http import HttpResponse, HttpResponseRedirect
 from django.utils import simplejson
 import settings
@@ -17,13 +17,13 @@ source_schema = 'golf'
 ##
 def main_console(req, dbname):
     db = TamerDB(dbname)
-    return render_to_response('tamer/console.html', {
+    return render(req, 'tamer/console.html', {
         'navitems': nav_items(db),})
 
 
 def import_console(req, dbname, import_object):
     db = TamerDB(dbname)
-    return render_to_response('tamer/import-console.html', {
+    return render(req, 'tamer/import-console.html', {
         'navitems': nav_items(db), 'tables': db.schema_tables(source_schema),
         'global_attributes': db.global_attribute_names(),
         'schemaname': source_schema, 'object': import_object})
@@ -36,14 +36,14 @@ def source_console(req, dbname, sid):
     source = {'id': sid, 'name': db.source_name(sid),
               'stats': db.source_stats(sid)}
 
-    return render_to_response('tamer/source-console.html', {
+    return render(req, 'tamer/source-console.html', {
         'navitems': nav_items(db), 'source': source, 'tab': tab,
         'actionsets': action_sets(db, tab, sid)})
 
 def config_console(req, dbname, model_name):
     db = TamerDB(dbname)
     mname = 'Entity Resolution' if model_name == 'dedup' else 'Schema Mapping'
-    return render_to_response('tamer/config-console.html', {
+    return render(req, 'tamer/config-console.html', {
         'navitems': nav_items(db),
         'mod_name': mname,
         'params': db.config_params(model_name)})
@@ -57,7 +57,7 @@ def set_config(req, dbname, model_name):
 
 def init_dedup_console(req, dbname):
     db = TamerDB(dbname)
-    return render_to_response('tamer/init-dedup-console.html', {
+    return render(req, 'tamer/init-dedup-console.html', {
         'navitems': nav_items(db),
         'attributes': db.global_attributes()})
 
@@ -93,7 +93,7 @@ def compare_entities(req, dbname):
     e2 = {'id': eid2, 'data': db.entity_data(eid2)}
     guess = 'Yes' if sim > 0.6 else 'No'
     attr = pretty_order_entity_attributes(e1, e2)
-    return render_to_response('doit/compare-entities.html', {
+    return render(req, 'doit/compare-entities.html', {
         'attributes': attr, 'similarity': sim, 'guess': guess,
         'e1id': eid1, 'e2id': eid2,})
 
@@ -217,14 +217,14 @@ def widget_attr_labeller(req, dbname):
 
     attrs = [{'name': a, 'labels': labels}
              for a in db.table_attributes(tablename)]
-    return render_to_response('tamer/widget-attribute-labeller.html', {
+    return render(req, 'tamer/widget-attribute-labeller.html', {
         'attrs': attrs})
 
 def widget_attr_radio(req, dbname):
     db = TamerDB(dbname)
     tablename = req.GET['tablename'] if 'tablename' in req.GET else req.POST['tablename']
     n = req.GET['name'] if 'name' in req.GET else req.POST['name']
-    return render_to_response('tamer/widget-attribute-radio.html', {
+    return render(req, 'tamer/widget-attribute-radio.html', {
         'attrs': db.table_attributes(tablename), 'inputname': n})
 
 ##

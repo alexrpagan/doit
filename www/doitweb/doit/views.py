@@ -2,16 +2,17 @@ import random
 from doit.util import bucketize
 from doit.dataaccess import DoitDB
 from operator import itemgetter
-from django.shortcuts import render_to_response
+from django.shortcuts import render_to_response, render
 from django.http import HttpResponse
 from django.utils import simplejson
+from django.template import RequestContext
 import settings
 
 
 def source_index(req, dbname):
     db = DoitDB(dbname)
-    return render_to_response('doit/source_index.html', {
-            'source_list': db.sources(), 'dbname': dbname, })
+    return render(req, 'doit/source_index.html', {
+                       'source_list': db.sources(), 'dbname': dbname, })
 
 
 def source_processor(req, dbname, sid, method_index):
@@ -33,9 +34,8 @@ def mapper(req, sid, dbname):
         egs.setdefault(int(fid), None)
         field_mappings[fid]['example'] = egs[int(fid)]
     attr_list = sorted(field_mappings.values(), key=lambda f: f['match']['score'])
-    return render_to_response('doit/mapper.html', {
-        'attr_list': attr_list, 'source_id': sid,
-        'meta': meta, })
+    return render(req, 'doit/mapper.html', {
+                       'attr_list': attr_list, 'source_id': sid, 'meta': meta, })
 
 
 def mapper_by_field_name(req, dbname, field_name, comp_op):
@@ -47,7 +47,7 @@ def mapper_by_field_name(req, dbname, field_name, comp_op):
 #    for fid in field_mappings:
 #        egs.setdefault(int(fid), None)
 #        field_mappings[fid]['example'] = egs[int(fid)]
-    return render_to_response('doit/mapper.html', {
+    return render(req, 'doit/mapper.html', {
         'attr_list': field_mappings.values(), 'field_name': field_name,
         'meta': meta, })
 
@@ -85,7 +85,7 @@ def mapper_by_field_set(req, dbname):
          'expertsrc_url': settings.EXPERTSRC_URL,
          'answerer_id': answerer_id,
          'domain_id': domain_id}
-    return render_to_response('doit/expertsrc-mapper.html', c)
+    return render(req, 'doit/expertsrc-mapper.html', c, context_instance=RequestContext(req))
 
 
 def source_meta(req, dbname, sid):
@@ -93,11 +93,11 @@ def source_meta(req, dbname, sid):
     meta = dict()
     meta['data'] = db.source_meta(sid)
     meta['category'] = 'Source %s' % sid
-    return render_to_response('doit/source_meta.html', {'meta': meta})
+    return render(req, 'doit/source_meta.html', {'meta': meta})
 
 
 def viewTable_template(req):
-    return render_to_response('doit/viewTable_template.html')
+    return render(req, 'doit/viewTable_template.html')
 
 
 def source_data(req, dbname, sid):
@@ -122,7 +122,7 @@ def source_table(req, dbname, sid):
             if vals[-1] is None:
                 vals[-1] = ''
         entity['fields'] = vals
-    return render_to_response('doit/viewTable_template.html', {
+    return render(req, 'doit/viewTable_template.html', {
                 'fields': fields, 'entities': entities})
 
 
@@ -135,7 +135,7 @@ def source_entities(req, dbname, sid):
 
 def field_candidates(req, fid, dbname):
     db = DoitDB(dbname)
-    return render_to_response('doit/candidate_list.html', {
+    return render(req, 'doit/candidate_list.html', {
         'fid': fid, 'candidates': db.field_candidates(fid)})
 
 
@@ -151,7 +151,7 @@ def mapper_results(req, dbname):
 
 
 def suggest_new_attribute_form(req, dbname):
-    return render_to_response('doit/suggest_new_attribute_form.html', {
+    return render(req, 'doit/suggest_new_attribute_form.html', {
         'fid': req.GET['fid'], 'fname': req.GET['fname'], 'dbname': dbname})
 
 
@@ -175,7 +175,7 @@ def lowscoremapper(req, dbname):
         cand = sorted(matchscores[name],
                               key=itemgetter(2), reverse=True)
         attr_list.append({'name': name, 'candidates': cand})
-    return render_to_response('doit/mapper.html', {'attr_list': attr_list})
+    return render(req, 'doit/mapper.html', {'attr_list': attr_list})
 
 
 def detail_summary(req, dbname, fid):
@@ -185,7 +185,7 @@ def detail_summary(req, dbname, fid):
     meta = db.field_meta(fid)
     vals = db.fieldexamples(fid, 1000, distinct=False)
     histo = bucketize(vals)
-    return render_to_response('doit/pop_summary.html', {
+    return render(req, 'doit/pop_summary.html', {
             'histo': histo, 'attr_name': attr_name, 'source': source_name, 'fid': fid,
             'metadata': meta, 'db': dbname, })
 
@@ -208,7 +208,7 @@ def detail_examples(req, dbname, fid):
                 transpose[i + 1].append(eg['values'][i])
             except IndexError:
                 transpose[i + 1].append(' ')
-    return render_to_response('doit/pop_egs.html', {
+    return render(req, 'doit/pop_egs.html', {
             'examples': transpose, 'attr_name': attr_name, 'fid': fid,
             'db': dbname})
 
@@ -234,7 +234,7 @@ def detail_shared(req, dbname, fid):
                         shared_value = True
             except IndexError:
                 table[i + 1].append(' ')
-    return render_to_response('doit/pop_shared.html', {
+    return render(req, 'doit/pop_shared.html', {
             'shared': table, 'attr_name': attr_name, 'fid': fid,
             'db': dbname, 'at_least_one': shared_value, })
 
@@ -250,7 +250,7 @@ def detail_distro(req,  dbname, fid):
         histo = bucketize(db.globalfieldexamples(int(match['id']), n=1000, distinct=False))
         histo['name'] = match['name']
         histos.append(histo)
-    return render_to_response('doit/pop_distro.html', {
+    return render(req, 'doit/pop_distro.html', {
             'histos': histos, 'attr_name': attr_name, 'fid': fid,
             'db': dbname, })
 
@@ -259,7 +259,7 @@ def detail_scoring(req, dbname, fid):
     db = DoitDB(dbname)
     attr_name = db.fieldname(fid)
     matches = db.indivscores(fid)
-    return render_to_response('doit/pop_scores.html', {
+    return render(req, 'doit/pop_scores.html', {
             'matches': matches, 'attr_name': attr_name, 'fid': fid,
             'db': dbname, })
 
@@ -274,7 +274,7 @@ def compare_entities(req, dbname):
     e2 = {'id': eid2, 'data': db.entity_data(eid2)}
     guess = 'Yes' if sim > 0.6 else 'No'
     attr = pretty_order_entity_attributes(e1, e2)
-    return render_to_response('doit/compare-entities.html', {
+    return render(req, 'doit/compare-entities.html', {
         'attributes': attr, 'similarity': sim, 'guess': guess,
         'e1id': eid1, 'e2id': eid2, })
 
