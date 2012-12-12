@@ -12,11 +12,11 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'apagan',                      # Or path to database file if using sqlite3.
-        'USER': 'apagan',                      # Not used with sqlite3.
+        'NAME': 'doit',                      # Or path to database file if using sqlite3.
+        'USER': 'doit',                      # Not used with sqlite3.
         'PASSWORD': '12345',                  # Not used with sqlite3.
-        'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
-        'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
+        'HOST': 'localhost',                      # Set to empty string for localhost. Not used with sqlite3.
+        'PORT': '5432',                      # Set to empty string for default. Not used with sqlite3.
     }
 }
 
@@ -67,6 +67,16 @@ TEMPLATE_LOADERS = (
 #     'django.template.loaders.eggs.Loader',
 )
 
+TEMPLATE_CONTEXT_PROCESSORS = (
+    'django.contrib.auth.context_processors.auth',
+    'django.core.context_processors.debug',
+    'django.core.context_processors.i18n',
+    'django.core.context_processors.media',
+    'django.core.context_processors.static',
+    'django.contrib.messages.context_processors.messages',
+    'middleware.url_context',
+)
+
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -81,7 +91,7 @@ TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    '/home/apagan/doit/www/templates',
+    '/Users/apagan/Dev/dt-deploy/ve/apps/doit/www/templates',
 )
 
 INSTALLED_APPS = (
@@ -97,8 +107,68 @@ INSTALLED_APPS = (
     # 'django.contrib.admindocs',
 )
 
-STATIC_URL = '/static/'
+#STATICFILES_DIRS = ('/Users/apagan/Dev/dt-deploy/ve/apps/doit/www/static',)
 
-STATICFILES_DIRS = ('/home/apagan/doit/www/static',)
 
-EXPERTSRC_URL = 'http://modis.csail.mit.edu:8888'
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': True,
+    'formatters': {
+        'standard': {
+            'format' : "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
+            'datefmt' : "%d/%b/%Y %H:%M:%S"
+        },
+    },
+    'handlers': {
+        'null': {
+            'level':'DEBUG',
+            'class':'django.utils.log.NullHandler',
+        },
+        'logfile': {
+            'level':'DEBUG',
+            'class':'logging.handlers.RotatingFileHandler',
+            'filename': "/Users/apagan/Dev/dt-deploy/ve/log/doit_debug.log",
+            'maxBytes': 50000,
+            'backupCount': 2,
+            'formatter': 'standard',
+        },
+        'console':{
+            'level':'INFO',
+            'class':'logging.StreamHandler',
+            'formatter': 'standard'
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers':['console'],
+            'propagate': True,
+            'level':'WARN',
+        },
+        'django.db.backends': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'tamer': {
+            'handlers': ['console', 'logfile'],
+            'level': 'DEBUG',
+        },
+        'doit': {
+            'handlers': ['console', 'logfile'],
+            'level': 'DEBUG',
+        },
+    }
+}
+
+BASE_URL = ''
+
+ALT_ROOT = 'apps/datatamer'
+
+#STATIC_URL = ''.join((ALT_ROOT, '/static/',))
+
+STATIC_URL = '/static/' 
+
+LOGIN_URL = ''.join((ALT_ROOT, 'login/',))
+
+EXPERTSRC_URL = 'http://localhost:9999/apps/expertsrc'
+
