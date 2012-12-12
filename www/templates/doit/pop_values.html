@@ -25,24 +25,20 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 {% block content %}
 <div>
-  <div style="margin:1em;">
-    <ul class="nav nav-pills">
-      <li class="{% block subnav-egs %}{% endblock subnav-egs%}">
-	<a href="/doit/{{ db }}/fields/{{ fid }}/values/examples"
-	   onclick="fill_popover(this.href, 800); return false;">Example Values</a>
-      </li>
-      <li class="{% block subnav-shared %} {% endblock subnav-shared %}">
-	<a href="/doit/{{ db }}/fields/{{ fid }}/values/shared" 
-	   onclick="fill_popover(this.href, 800); return false;">Shared Values</a>
-      </li>
-      <!-- <li class="{% block subnav-distro %}{% endblock subnav-distro %}"> -->
-      <!-- 	<a href="/doit/{{ db }}/fields/{{ fid }}/values/distro"  -->
-      <!-- 	   onclick="fill_popover(this.href, 800); return false;">Distributions</a> -->
-      <!-- </li> -->
-    </ul>
-  </div>
-
-  {% block info %}{% endblock info %}
-
+    <div style="margin:1em;">
+        <ul class="nav nav-pills">
+            <li class="{% block subnav-egs %}{% endblock subnav-egs%}">
+                <a href="{% url doit:detail_examples db fid %}" onclick="fill_popover(this.href, 800); return false;">Example Values</a>
+            </li>
+            <li class="{% block subnav-shared %} {% endblock subnav-shared %}">
+                <a href="{% url doit:detail_shared db fid %}" onclick="fill_popover(this.href, 800); return false;">Shared Values</a>
+            </li>
+            <!-- <li class="{% block subnav-distro %}{% endblock subnav-distro %}"> -->
+            <!-- <a href="{% url doit:detail_distro db fid %}"  -->
+            <!--    onclick="fill_popover(this.href, 800); return false;">Distributions</a> -->
+            <!-- </li> -->
+        </ul>
+    </div>
+{% block info %}{% endblock info %}
 </div>
 {% endblock content %}

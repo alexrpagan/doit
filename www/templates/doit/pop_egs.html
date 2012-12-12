@@ -24,16 +24,16 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 {% block subnav-egs %}active{% endblock subnav-egs %}
 
 {% block info %}
-      <div class="alert alert-info">
-	Use this panel to view sample data values from the data attribute being mapped (i.e. the highlighted column) and its top matches. 
-      </div>
-      <table class="spreadsheetish">
-        {% for row in examples %}
-   	  <tr{% if forloop.first %} class="header"{% endif %}>
-	    {% for item in row|slice:":5" %}
-	      <td{% if forloop.first %} class="highlight"{% endif %}>{{ item|truncatewords:10 }}</td>
-	    {% endfor %}
-	  </tr>
+<div class="alert alert-info">
+    Use this panel to view sample data values from the data attribute being mapped (i.e. the highlighted column) and its top matches.
+</div>
+<table class="spreadsheetish">
+    {% for row in examples %}
+    <tr{% if forloop.first %} class="header"{% endif %}>
+        {% for item in row|slice:":5" %}
+        <td{% if forloop.first %} class="highlight"{% endif %}>{{ item|truncatewords:10 }}</td>
         {% endfor %}
-      </table>
+    </tr>
+    {% endfor %}
+</table>
 {% endblock info %}

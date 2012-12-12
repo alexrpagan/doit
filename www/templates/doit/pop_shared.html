@@ -24,22 +24,22 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 {% block subnav-shared %}active{% endblock subnav-shared %}
 
 {% block info %}
-<div class="alert alert-info">
-  Use this panel to view values that appear both in the data attribute being mapped and in its top global attribute matches.   
-</div>
-{% if at_least_one %}
-<table class="spreadsheetish">
-  {% for row in shared %}
-  <tr{% if forloop.first %} class="header"{% endif %}>
-    {% for item in row|slice:":5" %}
-    <td>{{ item }}</td>
-    {% endfor %}
-  </tr>
-  {% endfor %}
-</table>
-{% else %}
-<div class="alert alert-warning">
-  NOTE: This field does not share any values with the top global attribute matches.
-</div>
-{% endif %}
+    <div class="alert alert-info">
+        Use this panel to view values that appear both in the data attribute being mapped and in its top global attribute matches.
+    </div>
+    {% if at_least_one %}
+    <table class="spreadsheetish">
+        {% for row in shared %}
+            <tr{% if forloop.first %} class="header"{% endif %}>
+                {% for item in row|slice:":5" %}
+                    <td>{{ item }}</td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+        </table>
+    {% else %}
+    <div class="alert alert-warning">
+        NOTE: This field does not share any values with the top global attribute matches.
+    </div>
+    {% endif %}
 {% endblock info %}

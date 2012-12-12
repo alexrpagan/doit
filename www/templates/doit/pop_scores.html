@@ -25,50 +25,47 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 {% block content %}
 <div>
-  <div style="margin:1em;">
-    Scoring breakdown for best matches to <b>{{ attr_name }}</b>.
-  </div>
-
-  <hr />
-
-  <table class="spreadsheetish">
-    <tr>
-      <td></td>
-      {% for match in matches|slice:":4" %}
-      <td class="header">{{ match.name }}</td>
-      {% endfor %}
-    </tr>
-    <tr>
-      <td class="header">Synonyms</td>
-      {% for match in matches|slice:":4" %}
-      <td>{{ match.qgrams|default:0|floatformat:3 }}</td>
-      {% endfor %}
-    </tr>
-    <tr>
-      <td class="header">N-grams</td>
-      {% for match in matches|slice:":4" %}
-      <td>{{ match.ngrams|default:"0"|floatformat:3 }}</td>
-      {% endfor %}
-    </tr>
-    <tr>
-      <td class="header">MDL</td>
-      {% for match in matches|slice:":4" %}
-      <td>{{ match.mdl|default:"0"|floatformat:3 }}</td>
-      {% endfor %}
-    </tr>
-    <tr>
-      <td class="header">T-test</td>
-      {% for match in matches|slice:":4" %}
-      <td>{{ match.dist|default:"0"|floatformat:3 }}</td>
-      {% endfor %}
-    </tr>
-    <tr>
-      <td class="header">Composite</td>
-      {% for match in matches|slice:":4" %}
-      <td>{{ match.cscore|default:"0"|floatformat:3 }}</td>
-      {% endfor %}
-    </tr>
-  </table>
+    <div style="margin:1em;">
+        Scoring breakdown for best matches to <b>{{ attr_name }}</b>.
+    </div>
+    <hr/>
+    <table class="spreadsheetish">
+        <tr>
+            <td></td>
+            {% for match in matches|slice:":4" %}
+                <td class="header">{{ match.name }}</td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <td class="header">Synonyms</td>
+            {% for match in matches|slice:":4" %}
+            <td>{{ match.qgrams|default:0|floatformat:3 }}</td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <td class="header">N-grams</td>
+            {% for match in matches|slice:":4" %}
+            <td>{{ match.ngrams|default:"0"|floatformat:3 }}</td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <td class="header">MDL</td>
+            {% for match in matches|slice:":4" %}
+            <td>{{ match.mdl|default:"0"|floatformat:3 }}</td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <td class="header">T-test</td>
+            {% for match in matches|slice:":4" %}
+            <td>{{ match.dist|default:"0"|floatformat:3 }}</td>
+            {% endfor %}
+        </tr>
+        <tr>
+            <td class="header">Composite</td>
+            {% for match in matches|slice:":4" %}
+            <td>{{ match.cscore|default:"0"|floatformat:3 }}</td>
+            {% endfor %}
+        </tr>
+    </table>
 </div>
-
 {% endblock content %}

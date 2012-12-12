@@ -20,25 +20,22 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 {% endcomment %}
 
 {% block navlinks %}
-<ul class="nav nav-tabs">
-  <li class="{% block navlink-summary %}{% endblock navlink-summary %}">
-    <a href="/doit/{{ db }}/fields/{{ fid }}/summary"
-       onclick="fill_popover(this.href, 600); return false;">Summary</a>
-  </li>
+    <ul class="nav nav-tabs">
+        <li class="{% block navlink-summary %}{% endblock navlink-summary %}">
+            <a href="{% url doit:detail_summary db fid %}" onclick="fill_popover(this.href, 600); return false;">Summary</a>
+        </li>
 
-  <!--
-  <li class="{% block navlink-scores %}{% endblock navlink-scores %}">
-    <a href="/doit/{{ db }}/fields/{{ fid }}/scores"
-       onclick="fill_popover(this.href, 800); return false;">Scoring Breakdown</a>
-  </li>
-  -->
+        <!--
+        <li class="{% block navlink-scores %}{% endblock navlink-scores %}">
+          <a href="{% url doit:detail_scoring db fid %}"
+             onclick="fill_popover(this.href, 800); return false;">Scoring Breakdown</a>
+        </li>
+        -->
 
-  <li class="{% block navlink-values %}{% endblock navlink-values %}">
-  <a href="/doit/{{ db }}/fields/{{ fid }}/values/examples"
-     onclick="fill_popover(this.href, 800); return false;">Compare Data Values</a>
-  </li>
-</ul> 
-
+        <li class="{% block navlink-values %}{% endblock navlink-values %}">
+            <a href="{% url doit:detail_examples db fid %}" onclick="fill_popover(this.href, 800); return false;">Compare Data Values</a>
+        </li>
+    </ul>
 {% endblock navlinks %}
 
 {% block content %}

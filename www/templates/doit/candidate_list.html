@@ -3,6 +3,6 @@
     title="Score: {{ cand.score|floatformat }} out of 4.0"
     style="border-left-color:#{{ cand.red }}{{ cand.green }}44;"
     class="candidate{% if forloop.counter == 1 %} selected{% endif %}">
-  {{ cand.name }}
+    {{ cand.name }}
 </li>
 {% endfor %}

@@ -25,76 +25,76 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 {% block content %}
     <div style="margin:0 auto;width:800px;">
-      <form id="process-source-form" action="/doit/{{ dbname }}/sources/">
-        <fieldset>
-          <legend>Process a new source</legend>
-          <div>
-            <label for="new-source">Enter source ID here:</label>
-            <input type="text" id="new-source" name="sid" value=""></input>
-            <input type="submit" name="submit" value="Go"></input>
-          </div>
-          <div>Note: processing results may take a few minutes!</div>
-          <div>Status: <span class="status"></span></div>
-        </fieldset>
-      </form>
-      <h3>Search by field name</h3>
-      <form id="field-search-form" action="/doit/{{ dbname }}/fields/">
-        <fieldset>
-          <legend>Enter field name here</legend>
-          <input type="text"></input>
-          <input type="checkbox">Exact match?</input>
-          <input type="submit" value="Go"></input>
-        </fieldset>
-      </form>
-      {% if source_list %}
-      <div class="sourceList">
-        <table class="sourceList-nav">
-          <tr>
-            <td>View:</td>
-            <td class="viewControls">
-              <span class="integrated">Integrated</span>
-              <span class="processed">Processed</span>
-              <span class="all">All</span>
-            </td>
-            <td>
-              <input type="text" value="Find" class="textFilter-input"></input>
-            </td>
-          </tr>
-        </table>
-        <table class="sourceList-header">
-          <tr class="">
-            <td class="id">ID</td>
-            <td class="name">Name</td>
-            <td class="rows">Rows</td>
-            <td class="cols">Columns (mapped)</td>
-            <td class="vals">Non-empty Cells</td>
-          </tr>
-        </table>
-        <div class="sourceList-sources">
-          <table>
-            {% for s in source_list %}
-            <tr class="textFilter-target {% cycle '' 'alt' %}{% if s.n_attr == s.n_mapped %} integrated{% endif %}">
-              <td class="id textFilter-match">{{ s.id }}</td>
-              <td class="name textFilter-match">
-                <a href="./sources/{{ s.id }}/map">{% if s.name %}{{ s.name }}{% else %}A source with no name{% endif %}</a>
-              </td>
-              <td class="rows">{{ s.n_entities }}</td>
-              <td class="cols">{{ s.n_attr }} ({{ s.n_mapped }})</td>
-              <td class="vals">{{ s.n_val }}</td>
-            </tr>
-            {% endfor %}
-          </table>
+        <form id="process-source-form" action="/doit/{{ dbname }}/sources/">
+            <fieldset>
+                <legend>Process a new source</legend>
+                <div>
+                    <label for="new-source">Enter source ID here:</label>
+                    <input type="text" id="new-source" name="sid" value=""></input>
+                    <input type="submit" name="submit" value="Go"></input>
+                </div>
+                <div>Note: processing results may take a few minutes!</div>
+                <div>Status: <span class="status"></span></div>
+            </fieldset>
+        </form>
+        <h3>Search by field name</h3>
+        <form id="field-search-form" action="/doit/{{ dbname }}/fields/">
+            <fieldset>
+                <legend>Enter field name here</legend>
+                <input type="text"></input>
+                <input type="checkbox">Exact match?</input>
+                <input type="submit" value="Go"></input>
+            </fieldset>
+        </form>
+        {% if source_list %}
+        <div class="sourceList">
+            <table class="sourceList-nav">
+                <tr>
+                    <td>View:</td>
+                    <td class="viewControls">
+                        <span class="integrated">Integrated</span>
+                        <span class="processed">Processed</span>
+                        <span class="all">All</span>
+                    </td>
+                    <td>
+                        <input type="text" value="Find" class="textFilter-input"></input>
+                    </td>
+                </tr>
+            </table>
+            <table class="sourceList-header">
+                <tr class="">
+                    <td class="id">ID</td>
+                    <td class="name">Name</td>
+                    <td class="rows">Rows</td>
+                    <td class="cols">Columns (mapped)</td>
+                    <td class="vals">Non-empty Cells</td>
+                </tr>
+            </table>
+            <div class="sourceList-sources">
+                <table>
+                    {% for s in source_list %}
+                        <tr class="textFilter-target {% cycle '' 'alt' %}{% if s.n_attr == s.n_mapped %} integrated{% endif %}">
+                            <td class="id textFilter-match">{{ s.id }}</td>
+                            <td> class="name textFilter-match">
+                                <a href="./sources/{{ s.id }}/map">{% if s.name %}{{ s.name }}{% else %}A source with no name{% endif %}</a>
+                            </td>
+                            <td class="rows">{{ s.n_entities }}</td>
+                            <td class="cols">{{ s.n_attr }} ({{ s.n_mapped }})</td>
+                            <td class="vals">{{ s.n_val }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
         </div>
-      </div>
-      {% else %}
+        {% else %}
         <p>No sources are available!</p>
-      {% endif %}
+        {% endif %}
     </div>
 {% endblock content %}
 
 {% block jquery %}
-  <script type="text/javascript" src="/static/js/jquery.sourceProcessor.js"></script>
-  <script type="text/javascript" src="/static/js/jquery.fieldSearchForm.js"></script>
-  <script type="text/javascript" src="/static/js/jquery.textFilter.js"></script>
-  <script type="text/javascript" src="/static/js/sourceIndex.js"></script>
+<script type="text/javascript" src="/static/js/jquery.sourceProcessor.js"></script>
+<script type="text/javascript" src="/static/js/jquery.fieldSearchForm.js"></script>
+<script type="text/javascript" src="/static/js/jquery.textFilter.js"></script>
+<script type="text/javascript" src="/static/js/sourceIndex.js"></script>
 {% endblock jquery %}

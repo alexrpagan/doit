@@ -1,5 +1,4 @@
 import psycopg2
-import copy
 import cPickle
 import random
 from operator import itemgetter
@@ -7,14 +6,18 @@ from django.conf import settings
 from protocol import expertsrc_pb2
 from protocol.batchqueue import BatchQueue
 
+
 # convert float (0 to 1) to 8 bit web color (e.g. 00 to ff)
 def f2c(x):
-    if x > 1.0: x = 1.0
-    if x < 0.0: x = 0.0
-    c = hex(int(255*x))[2:]
+    if x > 1.0:
+        x = 1.0
+    if x < 0.0:
+        x = 0.0
+    c = hex(int(255 * x))[2:]
     if len(c) == 1:
         c = '0' + c
     return c
+
 
 # Faster than copy.deepcopy, but totally hacky:
 # http://stackoverflow.com/questions/1410615/copy-deepcopy-vs-pickle
@@ -27,7 +30,7 @@ class DoitDB:
 
     def __init__(self, dbname):
         if self.conn is None:
-            self.conn = psycopg2.connect(database=dbname, 
+            self.conn = psycopg2.connect(database=dbname,
                                          user=settings.DATABASES['default']['USER'],
                                          password=settings.DATABASES['default']['PASSWORD'],
                                          host=settings.DATABASES['default']['HOST'])
@@ -39,7 +42,7 @@ class DoitDB:
                         ls.n_entities, ls.n_fields,
                         COUNT(am.source_id) AS "mapped",
                         COUNT(am.source_id)::FLOAT / ls.n_fields AS "ratio"
-                   FROM local_sources ls 
+                   FROM local_sources ls
               LEFT JOIN local_source_meta lsm
                      ON ls.id = lsm.source_id
                     AND upper(lsm.meta_name) = 'NAME'
@@ -51,7 +54,7 @@ class DoitDB:
                           FROM local_fields lf, attribute_mappings m
                          WHERE m.local_id = lf.id
                            AND lf.n_values > 0) am
-                     ON ls.id = am.source_id 
+                     ON ls.id = am.source_id
                   WHERE n_fields > 0
                GROUP BY ls.id, ls.n_entities, ls.n_fields, lsm.value, nval.value
                ORDER BY random();'''
@@ -152,20 +155,21 @@ class DoitDB:
               '    local_id, global_id, confidence, authority, who_created, ' \
               '    when_created, why_created) ' \
               'VALUES '
-        if anti: cmd = cmd.replace('mappings', 'antimappings')
+        if anti:
+            cmd = cmd.replace('mappings', 'antimappings')
         for local_id, global_id, conf in pairs:
             cmd = cmd + '(%s, %s, %s, %s, %s, NOW(), %s), '
             params.append(local_id)
             params.append(global_id)
-            params.append(int(conf)/100.0)
+            params.append(int(conf) / 100.0)
             params.append(answerer_auth)
             params.append(answerer_id)
             params.append("Expertsrc")
 
             # register answers with expertsrc
             answer = batch.getbatchobj().answer.add()
-            answer.answerer_id = answerer_id 
-            answer.confidence = int(conf)/100.0
+            answer.answerer_id = answerer_id
+            answer.confidence = int(conf) / 100.0
             answer.authority = answerer_auth
             answer.global_attribute_id = int(global_id)
             answer.local_field_id = int(local_id)
@@ -215,22 +219,6 @@ class DoitDB:
                 pass
         return sorted(candidates.values(), key=itemgetter('score'), reverse=True)
 
-    # def field_candidates(self, field_id):
-    #     cur = self.conn.cursor()
-    #     candidates = self.global_attributes()
-    #     for id in candidates:
-    #         candidates[id].setdefault('score', 0.0)
-    #         candidates[id].setdefault('green', f2c(0))
-    #         candidates[id].setdefault('red', f2c(1))
-    #     cmd = '''SELECT match_id, score FROM nr_ncomp_results_tbl
-    #               WHERE field_id = %s;'''
-    #     cur.execute(cmd, (field_id,))
-    #     for rec in cur.fetchall():
-    #         candidates[rec[0]]['score'] = rec[1]
-    #         candidates[rec[0]]['green'] = f2c(rec[1] / 1.0)
-    #         candidates[rec[0]]['red'] = f2c(1.0 - rec[1] / 2.0)
-    #     return sorted(candidates.values(), key=itemgetter('score'), reverse=True)
-
     def field_mappings_by_source(self, source_id):
         cur = self.conn.cursor()
         fields = dict()
@@ -263,7 +251,7 @@ class DoitDB:
             if rec[0] not in fields:
                 fields[rec[0]] = {'id': rec[0], 'name': rec[1], 'match': {
                     'id': rec[2], 'name': rec[3], 'score': rec[4],
-                    'green': f2c(rec[4] / 1.0), 'red':f2c(1.0 - rec[4] / 2.0)}}
+                    'green': f2c(rec[4] / 1.0), 'red': f2c(1.0 - rec[4] / 2.0)}}
         return fields
 
     def field_mappings_by_source2(self, source_id):
@@ -298,13 +286,11 @@ class DoitDB:
             fid, fname, gid, gname, score = rec
             fields[fid].setdefault('match', {
                 'id': gid, 'name': gname, 'score': score,
-                'green': f2c(score / 1.0), 'red':f2c(1.0 - score / 2.0)})
+                'green': f2c(score / 1.0), 'red': f2c(1.0 - score / 2.0)})
         for fid in fields:
             if 'match' not in fields[fid]:
                 fields[fid]['match'] = {'id': 0, 'name': 'Unknown', 'score': 0, 'green': f2c(0), 'red': f2c(1)}
         return fields
-
-
 
     def field_mappings_by_name(self, field_name, exact_match=False, n=100):
         cur = self.conn.cursor()
@@ -341,7 +327,7 @@ class DoitDB:
             if rec[0] not in fields:
                 fields[rec[0]] = {'id': rec[0], 'name': rec[1], 'match': {
                     'id': rec[2], 'name': rec[3], 'score': rec[4],
-                    'green': f2c(rec[4] / 2.0), 'red':f2c(1.0 - rec[4] / 3.0)}}
+                    'green': f2c(rec[4] / 2.0), 'red': f2c(1.0 - rec[4] / 3.0)}}
         return fields
 
     def field_mappings_by_id_list(self, field_ids, answerer_id):
@@ -351,10 +337,8 @@ class DoitDB:
         cur = self.conn.cursor()
         fields = dict()
         source_ids = set()
-        answered_ids = set()
 
         field_id_str = ','.join(map(str, field_ids))
-        
         # only fetch attributes that have not already been mapped by the user.
         cmd = '''SELECT lf.id, lf.local_name, lf.source_id, ls.local_id
                    FROM local_fields lf
@@ -369,16 +353,14 @@ class DoitDB:
 
         # if there's a better way to do this, I'd love to know it.
         cmd += ('lf.id in (%s);' % field_id_str)
-              
         cur.execute(cmd, (answerer_id,) * 2)
-        
         for rec in cur.fetchall():
             fid, fname, sid, sname = rec
             source_ids.add(sid)
-            fields.setdefault(fid, {'id': fid, 
-                                    'name': fname, 
-                                    'sid': sid, 
-                                    'source_name': sname })
+            fields.setdefault(fid, {'id': fid,
+                                    'name': fname,
+                                    'sid': sid,
+                                    'source_name': sname})
 
         cmd = '''SELECT lf.id, lf.local_name, nnr.match_id, ga.name, nnr.score
                    FROM nr_ncomp_results_tbl nnr, local_fields lf,
@@ -394,40 +376,19 @@ class DoitDB:
         for rec in records:
             fid, fname, gid, gname, score = rec
             fields[fid].setdefault('match', {
-                    'id': gid, 
-                    'name': gname, 
+                    'id': gid,
+                    'name': gname,
                     'score': score,
-                    'green': f2c(score / 1.0), 
-                    'red':f2c(1.0 - score / 2.0)})
-
+                    'green': f2c(score / 1.0),
+                    'red': f2c(1.0 - score / 2.0)})
         for fid in fields:
             if 'match' not in fields[fid]:
-                fields[fid]['match'] = {'id': 0, 
-                                        'name': 'Unknown', 
-                                        'score': 0, 
-                                        'green': f2c(0), 
+                fields[fid]['match'] = {'id': 0,
+                                        'name': 'Unknown',
+                                        'score': 0,
+                                        'green': f2c(0),
                                         'red': f2c(1)}
-
         return fields
-
-
-    def lowscorers(self, n):
-        pass
-#            cur = self.conn.cursor()
-#            cur.execute('SELECT a.name, b.id as match_id, b.name as match, a.score, a.source_id ' +
-#                          'FROM dan.nr_ncomp_results_tbl a, dan.global_attributes b, ' +
-#                               '(SELECT source_id, name FROM dan.nr_ncomp_max_results ORDER BY score ASC LIMIT %s) c ' +
-#                         'WHERE a.match = b.id ' +
-#                           'AND a.source_id = c.source_id AND a.name = c.name ' +
-#                      'ORDER BY score desc;', (n,))
-#
-#            scores = dict()
-#            for rec in cur.fetchall():
-#                    scores.setdefault(unicode(rec[4]) + ': ' +  rec[0], [])
-#                    scores[unicode(rec[4]) + ': ' + rec[0]].append((rec[2], rec[1], rec[3], f2c(rec[3]/3.0), f2c(1.0 - rec[3]/4.0)))
-#
-#            return scores
-
 
     def fieldname(self, field_id):
             cur = self.conn.cursor()
@@ -461,7 +422,6 @@ class DoitDB:
                 values.append(rec[0])
         return values
 
-
     # example values from a global attribute
     def globalfieldexamples(self, att_id, n, distinct=True):
         cur = self.conn.cursor()
@@ -489,7 +449,7 @@ class DoitDB:
     # 1 example value for each field in a source
     def examplevalues(self, source_id):
         cur = self.conn.cursor()
-        r = random.randint(1, 10000) # <-- TODO: replace with rand!
+        r = random.randint(1, 10000)  # <-- TODO: replace with rand!
         cmd = 'DROP TABLE IF EXISTS tmp_egs__%s;'\
               'CREATE TEMP TABLE tmp_egs__%s AS ' \
               '     SELECT field_id, value, random() r ' \
@@ -500,7 +460,7 @@ class DoitDB:
               '  FROM tmp_egs__%s a, (SELECT field_id, MAX(r) r ' \
               '                       FROM tmp_egs__%s GROUP BY field_id) b ' \
               ' WHERE a.field_id = b.field_id AND a.r = b.r;'
-        cur.execute(cmd, (r,r,source_id,r,r))
+        cur.execute(cmd, (r, r, source_id, r, r))
         egs = dict()
         for rec in cur.fetchall():
             egs[rec[0]] = rec[1]
@@ -516,7 +476,7 @@ class DoitDB:
               ' WHERE rr.field_id = %s ' \
               '   AND rr.field_id = cr.field_id ' \
               '   AND rr.match_id = ga.id AND rr.match_id = cr.match_id;'
-        cur.execute(cmd,(int(field_id),))
+        cur.execute(cmd, (int(field_id),))
         matches = dict()
         for rec in cur.fetchall():
             matches.setdefault(rec[1], {'id': rec[1], 'name': rec[2],
@@ -538,10 +498,10 @@ class DoitDB:
 #               ORDER BY random()
 #                  LIMIT 1;'''
         cmd = '''SELECT entity_a, entity_b, similarity
-                   FROM public.entity_pair_queue 
-                  WHERE human_label IS NULL 
-               ORDER BY priority DESC 
-                  LIMIT 1;'''                  
+                   FROM public.entity_pair_queue
+                  WHERE human_label IS NULL
+               ORDER BY priority DESC
+                  LIMIT 1;'''
         cur.execute(cmd)
         rec = cur.fetchone()
         e1, e2, s = rec
@@ -552,7 +512,7 @@ class DoitDB:
         cmd = '''SELECT tag_id, tag_id, lf.tag_code, ld.value
                    FROM public.doit_data ld
              INNER JOIN public.doit_fields lf
-                     ON ld.source_id = lf.source_id AND ld.name = lf.name              
+                     ON ld.source_id = lf.source_id AND ld.name = lf.name
                   WHERE lf.tag_code is not null AND ld.entity_id = %s;'''
 
         cur.execute(cmd, (int(eid),))

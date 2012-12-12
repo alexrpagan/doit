@@ -26,32 +26,35 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 {% block content %}
 <div style="margin:1em;">
 
-  <p>
-    Currently mapping field '<b>{{ attr_name }}</b>' in source '<b>{{ source }}</b>'.
-  </p>
-
-  <hr />
-
-  {% if histo %}
-  <div id="summary-histo" style="float:right;" class="histo-medium"></div>
-  <script type="text/javascript">
-    add_histo("#summary-histo", {{ histo.buckets }}, {{ histo.min|floatformat:2 }}, {{ histo.max|floatformat:2 }});
-  </script>
-  {% else %}
-  {% endif %}
-
-  <div>
-    <p class="lead">
-      Field Metadata: <br/>
-      <small>Imported from Pharon</small>
+    <p>
+        Currently mapping field '<b>{{ attr_name }}</b>' in source '<b>{{ source }}</b>'.
     </p>
-  </div>
 
-  <table>
-    {% for meta in metadata %}
-    <tr><th style="text-align:left;">{{ meta.name }}</th><td style="padding-left:10px;">{{ meta.value }}</td></tr>
-    {% endfor %}
-  </table>
+    <hr />
+
+    {% if histo %}
+        <div id="summary-histo" style="float:right;" class="histo-medium"></div>
+        <script type="text/javascript">
+            add_histo("#summary-histo", {{ histo.buckets }}, {{ histo.min|floatformat:2 }}, {{ histo.max|floatformat:2 }});
+        </script>
+    {% else %}
+    {% endif %}
+
+    <div>
+        <p class="lead">
+            Field Metadata: <br/>
+            <small>Imported from Pharon</small>
+        </p>
+    </div>
+
+    <table>
+        {% for meta in metadata %}
+            <tr>
+                <th style="text-align:left;">{{ meta.name }}</th>
+                <td style="padding-left:10px;">{{ meta.value }}</td>
+            </tr>
+        {% endfor %}
+    </table>
 
 </div>
 {% endblock content %}

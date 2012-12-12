@@ -25,57 +25,55 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
 {% block styles %}
-<link rel="stylesheet" href="/static/styles/base/jquery.ui.core.css" type="text/css" media="screen"/>
-<link rel="stylesheet" href="/static/styles/base/jquery.ui.slider.css" type="text/css" media="screen"/>
 {% endblock styles %}
 
 
 {% block content %}
-  <input id="page-data" 
-	 type="hidden" 
-	 data-answerer-id="{{answerer_id}}" 
-	 data-page-size="{{page_size}}"
-	 data-expertsrc-url="{{expertsrc_url}}"
-     data-domain-id="{{domain_id}}"/>
+<input id="page-data"
+    type="hidden"
+    data-answerer-id="{{answerer_id}}"
+    data-page-size="{{page_size}}"
+    data-expertsrc-url="{{expertsrc_url}}"
+    data-domain-id="{{domain_id}}"/>
 
-  <div class="pane top well">
+<div class="pane top well">
     <table style="width:100%;">
-      <tr>
-        <td class="title">
-	  <div class="curr-source lead">
-        {{source_name}}
-	  </div>
-	</td>
+        <tr>
+            <td class="title">
+                <div class="curr-source lead">
+                    {{source_name}}
+                </div>
+            </td>
 
-        <td>
-	  <div id="status-container" class="row pull-right hide span4">
-	     <div id="top-spin" style="margin-top:20px;" class="pull-left"></div>
-	     <div id="top-status" style="margin-top:5px;" class="lead pull-right">
-	     </div>
-	  </div>
-        </td>
-      
-        <td>
- 	  <div class="controls btn-toolbar pull-right">
-	    <div class="btn-group">
-	      <span class="toggle-data-panel btn control hide"></span>
-	    </div>
-	    <div class="btn-group">
-	      <span class="btn control help-btn">Help</span>
-              <!-- <span class="btn control mapall">Accept All</span>-->
-              <span class="btn control reset">Reset</span>
-              <!--<span class="button">Wrangle</span>-->
-              <span class="btn control save">Save</span>
-	      {% if expertsrc_url %}
-	      <span class="btn control back">Done</span>
-              {% endif %}
-	    </div>
-	  </div>
-        </td>
-      </tr>
+            <td>
+                <div id="status-container" class="row hide">
+                    <div id="top-spin"></div>
+                    <div id="top-status" class="pull-right"></div>
+                </div>
+            </td>
+
+            <td>
+                <div class="controls btn-toolbar pull-right">
+                    <div class="btn-group">
+                        <span class="toggle-data-panel btn control hide"></span>
+                    </div>
+                    <div class="btn-group">
+                        <span class="btn control help-btn">Help</span>
+                        <!-- <span class="btn control mapall">Accept All</span>-->
+                        <span class="btn control reset">Reset</span>
+                        <!--<span class="button">Wrangle</span>-->
+                        <span class="btn control save">Save</span>
+                        {% if expertsrc_url %}
+                        <span class="btn control back">Done</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </td>
+        </tr>
     </table>
-  </div>
-  <div class="pane left hide">
+</div>
+
+<div class="pane left hide">
     <!-- <div class="data-nav"> -->
     <!--   <div class="alert alert-info"> -->
     <!-- 	<a class="close" href="#" data-dismiss="alert">&times;</a> -->
@@ -83,161 +81,148 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
     <!-- 	<small>Source metadata is imported from Pharon.</small> -->
     <!--   </div> -->
     <!-- </div> -->
-    <div class="source-meta">
-    </div>
-  </div>
-  {% if attr_list %}
-  <div class="pane right">
-    <div class="viewTable hide">
-      
-    </div>
+    <div class="source-meta"></div>
+</div>
+
+{% if attr_list %}
+<div class="pane right">
+    <div class="viewTable hide"></div>
     <div class="msg alert alert-info hide">
-      <a href="#" class="close" data-dismiss="alert">&times;</a>
-      <span class="msg-text"></span>
+        <a href="#" class="close" data-dismiss="alert">&times;</a>
+        <span class="msg-text"></span>
     </div>
 
     {% include "doit/help.html" %}
 
     <table class="mapper table">
-	<tr>
-	  <th class="attr header-left lead">Local Data Attribute</th>
-      <th class="match-strength header lead">Match Strength</th>
-	  <th class="match header lead">Suggested Global Match</th>
-	  <th class="actions header lead">Actions</th>
-	  <th class="status header-right lead">Status</th>
-	</tr>
-      <tbody>
-      {% for attr in attr_list %}
-      <tr id="fid{{ attr.id }}" class="mapper-row {% if not attr.match.is_mapping %}un{% endif %}mapped {% cycle '' 'alt' %}">
-	<td class="attr lead" >
-	  <div class="row">
+        <tr>
+            <th class="attr header-left lead">Local Data Attribute</th>
+            <th class="match-strength header lead">Match Strength</th>
+            <th class="match header lead">Suggested Global Match</th>
+            <th class="actions header lead">Actions</th>
+            <th class="status header-right lead">Status</th>
+        </tr>
+        <tbody>
+        {% for attr in attr_list %}
+            <tr id="fid{{ attr.id }}" class="mapper-row {% if not attr.match.is_mapping %}un{% endif %}mapped {% cycle '' 'alt' %}">
+                <td class="attr lead" >
+                    <div class="row">
+                        <!--
+                            <div class="tooltip-container viewsource-btn-box">
+                              <span class="viewsource pull-left btn btn-mini" rel="tooltip" title="{{attr.source_name}}" data-source-id="{{attr.sid}}" data-source-name="{{attr.source_name}}"><i class="icon-search icon-eye-open"></i></span>
+                            </div>
+                        -->
+                        <div class="tooltip-container source-name">
+                            <div class="attr-name" title="From data source: '{{attr.source_name}}'">
+                                {{ attr.name }}
+                            </div>
+                        </div>
+                    </div>
+                </td>
 
-	    <!--
-	    <div class="tooltip-container viewsource-btn-box">
-	      <span class="viewsource pull-left btn btn-mini" rel="tooltip" title="{{attr.source_name}}" data-source-id="{{attr.sid}}" data-source-name="{{attr.source_name}}"><i class="icon-search icon-eye-open"></i></span>
-	    </div>
-	    -->
-	    <div class="tooltip-container source-name"> 
-	      <div class="attr-name" title="From data source: '{{attr.source_name}}'">
-		{{ attr.name }}
-	      </div>
-	    </div>
+                <td>
+                    <div class="score-color" style="background-color:#{{ attr.match.red }}{{ attr.match.green }}44;">
+                    </div>
+                </td>
 
-	  </div>
-	</td>
-    
-    <td>
-		<div class="score-color" style="background-color:#{{ attr.match.red }}{{ attr.match.green }}44;">
-		</div>
-    </td>
+                <td class="match">
+                    <div class="row">
+                    <div class="tooltip-container score">
+                        <div class="choice" rel="tooltip" id="{{ attr.id }}-is-{{ attr.match.id }}" title="Estimated match strength: {{ attr.match.score|floatformat }} out of 4.0">
 
-	<td class="match">
-	  <div class="row">
-	    <div class="tooltip-container score">
-              <div class="choice" rel="tooltip" id="{{ attr.id }}-is-{{ attr.match.id }}"
-	    	   title="Estimated match strength: {{ attr.match.score|floatformat }} out of 4.0">
+                            <div class="match-name" style="padding-top:5px;">
+                                {{ attr.match.name }}
+                            </div>
+                            <span class="dropdown per-row-actions">
+                                <a id="choice-drop-{{attr.id}}" class="drop dropdown-toggle btn-tooltip" role="button" data-toggle="dropdown" data-target="#" title="Select a different global attribute"><small>+ more matches</small></a>
+                                <div class="dropdown-menu map-list-cont"  aria-labeledby="choice-drop-{{attr.id}}" role="menu">
+                                    <div class="filter" style="margin:5px;"><input type="text" placeholder="Filter..."></input></div>
+                                        <ul class="map-list"></ul>
+                                    </div>
+                            </span>
+                        </div>
+                    </div>
+                </td>
 
-		<div class="match-name" style="padding-top:5px;">
-		  {{ attr.match.name }}
-		</div>
-        <span class="dropdown per-row-actions">
-  	    <a id="choice-drop-{{attr.id}}" class="drop dropdown-toggle btn-tooltip" role="button" data-toggle="dropdown" data-target="#" title="Select a different global attribute"><small>+ more matches</small></a>
-	       <div class="dropdown-menu map-list-cont"  aria-labeledby="choice-drop-{{attr.id}}" role="menu">
-		        <div class="filter" style="margin:5px;"><input type="text" placeholder="Filter..."></input></div>
-		        <ul class="map-list"></ul>
-	       </div>
-        </span>
-	    </div>
-	  </div>
-	</td>
-	
-        <td class="actions">
-	   <span class="btn-toolbar">
+                <td class="actions">
+                    <span class="btn-toolbar">
+                    <!-- <span class="dropdown btn-group"> -->
+                    <!-- </span> -->
 
-	     <!-- <span class="dropdown btn-group"> -->
-	     <!-- </span> -->
+                    <span class="dropdown btn-group per-row-actions">
+                        <span class="btn btn-tooltip accept" title="This match is correct"><i class="icon-search icon-ok"></i></span>
+                        <span class="btn btn-tooltip reject" title="This is not a valid match!"><i class="icon-search icon-remove"></i></span>
+                    </span>
 
-	     <span class="dropdown btn-group per-row-actions">
-	       <span class="btn btn-tooltip accept" title="This match is correct"><i class="icon-search icon-ok"></i></span>
-	       <span class="btn btn-tooltip reject" title="This is not a valid match!"><i class="icon-search icon-remove"></i></span>
-     </span> 
-	     
-	     <span class="btn-group per-row-actions">
-	       <span class="btn btn-tooltip reset" title="Reset match"><i class="icon-search icon-refresh"></i></span>
-	     </span>
+                    <span class="btn-group per-row-actions">
+                        <span class="btn btn-tooltip reset" title="Reset match"><i class="icon-search icon-refresh"></i></span>
+                    </span>
 
-	     <span class="btn-group per-row-actions">
-	       <span id="info-drop-{{attr.id}}" data-toggle="dropdown" data-target="#" class="btn btn-primary btn-tooltip dropdown-toggle" title="More information">
-		 <i class="icon-search icon-white icon-info"></i>
-	       </span>
-	       <ul class="dropdown-menu" aria-labeledby="info-drop-{{attr.id}}" role="menu">
-		 <li><a tabindex="-1" href="#" class="viewsource" title="{{attr.source_name}}" data-source-id="{{attr.sid}}" data-source-name="{{attr.source_name}}"> View data source</a></li>
-		 <li class="detail"><a tabindex="-1" href="#">View match details</a></li>
-	       </ul>
-	     </span>
+                    <span class="btn-group per-row-actions">
+                        <span id="info-drop-{{attr.id}}" data-toggle="dropdown" data-target="#" class="btn btn-primary btn-tooltip dropdown-toggle" title="More information">
+                            <i class="icon-search icon-white icon-info"></i>
+                        </span>
+                        <ul class="dropdown-menu" aria-labeledby="info-drop-{{attr.id}}" role="menu">
+                            <li><a tabindex="-1" href="#" class="viewsource" title="{{attr.source_name}}" data-source-id="{{attr.sid}}" data-source-name="{{attr.source_name}}"> View data source</a></li>
+                            <li class="detail"><a tabindex="-1" href="#">View match details</a></li>
+                        </ul>
+                    </span>
+                </td>
 
-	</td>
- 	<td class="status">unmapped</td>
-     </tr>
-      <tr class="confidence well hide">
-    <td></td>
-	<td></td>
-	<td>
-        <p style="padding-top:12px;">
-            Indicate how confident you feel in your answer:
-        </p>
-    </td>
-	<td class="actions">
-        <p title="How confident do you feel about your answer?">
-          <div class="confidence-btns" data-confidence="66">
-          <form>
-            <label class="radio inline low">
-                <input type="radio" name="conf" value="33"> Low
-            </label>
-            <label class="radio inline med">
-                <input type="radio" name="conf" value="66"> Medium
-            </label> 
-            <label class="radio inline high">
-                <input type="radio" name="conf" value="99"> High
-            </label>
-          </form>
-          </div>
-	</td>
-	<td><a href="#" class="btn btn-large done-with-confidence">OK</a></td>
-      </tr>
-
-      {% endfor %}
-      <tbody>
+                <td class="status">unmapped</td>
+            </tr>
+            <tr class="confidence well hide">
+                <td></td>
+                <td></td>
+                <td>
+                    <p style="padding-top:12px;">
+                        Indicate how confident you feel in your answer:
+                    </p>
+                </td>
+                <td class="actions">
+                    <p title="How confident do you feel about your answer?">
+                    <div class="confidence-btns" data-confidence="66">
+                        <form>
+                            <label class="radio inline low">
+                                <input type="radio" name="conf" value="33"> Low
+                            </label>
+                            <label class="radio inline med">
+                                <input type="radio" name="conf" value="66"> Medium
+                            </label>
+                            <label class="radio inline high">
+                                <input type="radio" name="conf" value="99"> High
+                            </label>
+                        </form>
+                    </div>
+                </td>
+                <td>
+                    <a href="#" class="btn btn-large done-with-confidence">OK</a>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
     </table>
-  </div>
-  <div id="detailModal" class="modal hide fade">
+</div>
+
+<div id="detailModal" class="modal hide fade">
     <div class="modal-header">
-      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-      <h3>Match Info</h3>
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3>Match Info</h3>
     </div>
     <div id="modal-contents" class="modal-body">
     </div>
-  </div>
+</div>
 
-  {% else %}
-  <div>Nothing to do!</div>
-  {% endif %}
+{% else %}
+<div>Nothing to do!</div>
+{% endif %}
 
 {% endblock content %}
 
 {% block jquery %}
-  <script type="text/javascript" src="/static/js/jquery.ui.core.min.js"></script>
-  <script type="text/javascript" src="/static/js/jquery.ui.widget.min.js"></script>
-  <script type="text/javascript" src="/static/js/jquery.ui.mouse.min.js"></script>
-  <script type="text/javascript" src="/static/js/jquery.ui.slider.min.js"></script>
-  <script type="text/javascript" src="/static/js/jquery.cookie.js"></script>
-  <script type="text/javascript" src="/static/js/bootstrap.min.js"></script>
-  <script type="text/javascript" src="/static/js/spin.min.js"></script>
-  <script type="text/javascript" src="/static/js/expertsrc-mapper.js"></script>
-  <script type="text/javascript">
-    
-  </script>
-
+    <script type="text/javascript" src="/static/js/jquery.cookie.js"></script>
+    <script type="text/javascript" src="/static/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/static/js/expertsrc-mapper.js"></script>
 {% endblock jquery %}
 
 

@@ -9,10 +9,10 @@ urlpatterns = patterns('',
     # (r'^doitweb/', include('doitweb.foo.urls')),
 
     # doit gui (first GUI)
-    (r'^doit/', include('doit.urls')),
+    (r'^doit/', include('doit.urls', namespace='doit')),
 
     # data tamer console
-    (r'^tamer/', include('tamer.urls')),
+    (r'^tamer/', include('tamer.urls', namespace='tamer')),
 
     # Uncomment the admin/doc line below to enable admin documentation:
     # (r'^admin/doc/', include('django.contrib.admindocs.urls')),
