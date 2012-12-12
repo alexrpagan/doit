@@ -93,8 +93,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 {% endblock content %}
 
 {% block jquery %}
-<script type="text/javascript" src="/static/js/jquery.sourceProcessor.js"></script>
-<script type="text/javascript" src="/static/js/jquery.fieldSearchForm.js"></script>
-<script type="text/javascript" src="/static/js/jquery.textFilter.js"></script>
-<script type="text/javascript" src="/static/js/sourceIndex.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}js/jquery.sourceProcessor.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}js/jquery.fieldSearchForm.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}js/jquery.textFilter.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}js/sourceIndex.js"></script>
 {% endblock jquery %}

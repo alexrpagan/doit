@@ -116,8 +116,8 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 {% endblock content %}
 
 {% block jquery %}
-  <script type="text/javascript" src="/static/js/mapper.js"></script>
-  <script type="text/javascript" src="/static/js/viewTable.js"></script>
+  <script type="text/javascript" src="{{ STATIC_URL }}js/mapper.js"></script>
+  <script type="text/javascript" src="{{ STATIC_URL }}js/viewTable.js"></script>
   <script type="text/javascript">
 //    viewTable.init({{ source_id }});
   </script>
