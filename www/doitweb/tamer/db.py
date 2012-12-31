@@ -7,6 +7,7 @@ from django.conf import settings
 from protocol import expertsrc_pb2
 from protocol.batchqueue import BatchQueue
 import logging
+import random
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +32,7 @@ class TamerDB:
 
     def __init__(self, dbname):
         if self.conn is None:
-            self.conn = psycopg2.connect(database=dbname, 
+            self.conn = psycopg2.connect(database=dbname,
                                          user=settings.DATABASES['default']['USER'],
                                          password=settings.DATABASES['default']['PASSWORD'],
                                          host=settings.DATABASES['default']['HOST'])
@@ -121,7 +122,7 @@ class TamerDB:
 
     def config_params(self, model_name):
         cur = self.conn.cursor()
-        cmd ='''SELECT name, COALESCE(description, name), value FROM configuration_properties
+        cmd = '''SELECT name, COALESCE(description, name), value FROM configuration_properties
                  WHERE module = %s;'''
         cur.execute(cmd, (model_name,))
         return [{'name': r[0], 'description': r[1], 'value': r[2]} for r in cur.fetchall()]
@@ -136,13 +137,12 @@ class TamerDB:
 
     def dedup_model_exists(self):
         cur = self.conn.cursor()
-        #cmd = '''SELECT COUNT(*) FROM learning_attrs;'''
-        cmd = '''SELECT COUNT(weight), COUNT(*) FROM entity_field_weights;'''
-        cur.execute(cmd)
-        r = cur.fetchone()
-        return (int(r[0]) == int(r[1]) and int(r[0]) > 0)
-        
-
+        # #cmd = '''SELECT COUNT(*) FROM learning_attrs;'''
+        # cmd = '''SELECT COUNT(weight), COUNT(*) FROM entity_field_weights;'''
+        # cur.execute(cmd)
+        # r = cur.fetchone()
+        # return (int(r[0]) == int(r[1]) and int(r[0]) > 0)
+        return False
 
     ##
     # Major jobs
@@ -199,9 +199,9 @@ class TamerDB:
         cur.execute(cmd)
         for r in cur.fetchall():
             logger.info('sid -> %s', r[0])
-            cmd = '''INSERT INTO local_source_meta (source_id, meta_name, value) 
+            cmd = '''INSERT INTO local_source_meta (source_id, meta_name, value)
                      VALUES (%s, 'expertsrc_domain', 'data-tamer')'''
-            cur.execute(cmd, (r[0],)) 
+            cur.execute(cmd, (r[0],))
 
         # Preprocess source(s) for map and dedup
         cmd = '''SELECT DISTINCT sid::INTEGER FROM import_tmp;'''
@@ -252,44 +252,44 @@ class TamerDB:
 
     def preprocess_source(self, sid):
         cur = self.conn.cursor()
-        cmd = '''SELECT preprocess_source(%s);
-                 --SELECT extract_new_data(%s, true);
-                 TRUNCATE entity_test_group;
-                 INSERT INTO entity_test_group
-                      SELECT id FROM local_entities WHERE source_id = %s;
-                 SELECT entities_preprocess_test_group('t');'''
-        cur.execute(cmd, (sid, sid,sid,))
+        cmd = '''SELECT preprocess_source(%s); '''
+                 # --SELECT extract_new_data(%s, true);
+                 # TRUNCATE entity_test_group;
+                 # INSERT INTO entity_test_group
+                 #      SELECT id FROM local_entities WHERE source_id = %s;
+                 # SELECT entities_preprocess_test_group('t');'''
+        cur.execute(cmd, (sid,))
         self.conn.commit()
 
     def init_dedup(self, important, irrelevant):
         cur = self.conn.cursor()
-        #cmd = '''INSERT INTO learning_attrs (tag_id)
-        #              SELECT id
-        #                FROM global_attributes
-        #               WHERE name = %s;'''
-        cmd = '''TRUNCATE entity_field_weights;
-                 INSERT INTO entity_field_weights
-                      SELECT id, 1.0 FROM global_attributes;'''
-        cur.execute(cmd)
-        cmd = '''UPDATE entity_field_weights SET initial_bias = %s
-                  WHERE field_id IN (SELECT id FROM global_attributes WHERE name = %s);'''
-        for attr in important:
-            cur.execute(cmd, (10.0, attr))
-        for attr in irrelevant:
-            cur.execute(cmd, (0.1, attr))
-        cmd = '''UPDATE entity_field_weights SET weight = initial_bias;'''
-        cur.execute(cmd)
-        self.conn.commit()
+        # #cmd = '''INSERT INTO learning_attrs (tag_id)
+        # #              SELECT id
+        # #                FROM global_attributes
+        # #               WHERE name = %s;'''
+        # cmd = '''TRUNCATE entity_field_weights;
+        #          INSERT INTO entity_field_weights
+        #               SELECT id, 1.0 FROM global_attributes;'''
+        # cur.execute(cmd)
+        # cmd = '''UPDATE entity_field_weights SET initial_bias = %s
+        #           WHERE field_id IN (SELECT id FROM global_attributes WHERE name = %s);'''
+        # for attr in important:
+        #     cur.execute(cmd, (10.0, attr))
+        # for attr in irrelevant:
+        #     cur.execute(cmd, (0.1, attr))
+        # cmd = '''UPDATE entity_field_weights SET weight = initial_bias;'''
+        # cur.execute(cmd)
+        # self.conn.commit()
 
     def rebuild_dedup_models(self):
         cur = self.conn.cursor()
-        cmd = '''--SELECT learn_weights(0.05, 0.00001, 5, 1000, 0.2);
-                 TRUNCATE entity_test_group;
-                 INSERT INTO entity_test_group SELECT id FROM local_entities;
-                 SELECT entities_preprocess_test_group('t');
-                 SELECT entities_weights_from_test_group();'''
-        cur.execute(cmd)
-        self.conn.commit()
+        # cmd = '''--SELECT learn_weights(0.05, 0.00001, 5, 1000, 0.2);
+        #          TRUNCATE entity_test_group;
+        #          INSERT INTO entity_test_group SELECT id FROM local_entities;
+        #          SELECT entities_preprocess_test_group('t');
+        #          SELECT entities_weights_from_test_group();'''
+        # cur.execute(cmd)
+        # self.conn.commit()
 
     def rebuild_schema_mapping_models(self):
         cur = self.conn.cursor()
@@ -311,7 +311,25 @@ class TamerDB:
                  SELECT mdl_results_for_source(%s);
                  SELECT nr_composite_load();'''
         cur.execute(cmd, (sourceid, sourceid, sourceid))
+        self.conn.commit()
+
+    def answer_with_thresh(self, sourceid, thresh):
+        cur = self.conn.cursor()
         mappings = self.get_field_mappings_by_source(sourceid)
+        to_map = []
+        for fid in mappings:
+            attr = mappings[fid]
+            if 'who_mapped' not in attr['match'] and float(attr['match']['score']) >= float(thresh):
+                to_map.append({'local_id': fid, 'global_id': attr['match']['id']})
+        cmd = """ INSERT INTO attribute_mappings
+                    (local_id, global_id, when_created, who_created, confidence, authority, why_created)
+                  VALUES (%(local_id)s, %(global_id)s, NOW(), -2, 1, 1, 'AUTO') """
+        cur.executemany(cmd, to_map)
+        self.conn.commit()
+
+    def register_schema_map(self, sourceid):
+        cur = self.conn.cursor()
+        mappings = self.get_field_mappings_by_source(sourceid, only_unmapped=True)
         cmd = "SELECT id, name FROM global_attributes"
         cur.execute(cmd)
         global_attributes = self.dictfetchall(cur)
@@ -319,19 +337,19 @@ class TamerDB:
         batch_obj.type = expertsrc_pb2.QuestionBatch.SCHEMAMAP
         # TODO: make sure to grab this from auth service using provided cookie
         batch_obj.asker_name = 'data-tamer'
-        cmd = """SELECT local_id, value 
-                 FROM local_sources ls, local_source_meta lsm 
-                 WHERE ls.id = %s and lsm.source_id = ls.id and 
+        cmd = """SELECT local_id, value
+                 FROM local_sources ls, local_source_meta lsm
+                 WHERE ls.id = %s and lsm.source_id = ls.id and
                        lsm.meta_name = 'expertsrc_domain'"""
         cur.execute(cmd, (sourceid,))
-        source_name, domain_name = cur.fetchone() 
+        source_name, domain_name = cur.fetchone()
         logger.info('source_name -> %s' % source_name)
         logger.info('domain_name -> %s' % domain_name)
         batch_obj.source_name = source_name
         batch = BatchQueue('question', batch_obj)
         for fid in mappings.keys():
             question = batch.getbatchobj().question.add()
-            question.domain_name = domain_name 
+            question.domain_name = domain_name
             question.local_field_id = fid
             question.local_field_name = mappings[fid]['name']
             choices = mappings[fid]['matches']
@@ -347,16 +365,16 @@ class TamerDB:
                     choice_count -= 1
             # uncomment this if you want to add all global attributes as
             # potential choices.
-            # id_set = set(ids)
-            # for a in global_attributes:
-            #     if a['id'] not in id_set:
-            #         choice = question.choice.add()
-            #         choice.global_attribute_id = a['id']
-            #         choice.global_attribute_name = a['name']
+            id_set = set(ids)
+            for a in global_attributes:
+                if a['id'] not in id_set:
+                    choice = question.choice.add()
+                    choice.global_attribute_id = a['id']
+                    choice.global_attribute_name = a['name']
         batch.enqueue()
         self.conn.commit()
 
-    def get_field_mappings_by_source(self, source_id):
+    def get_field_mappings_by_source(self, source_id, only_unmapped=False):
         """ Retrieves all possible mappings for all fields in a source."""
         cur = self.conn.cursor()
         fields = dict()
@@ -367,9 +385,9 @@ class TamerDB:
                      ON lf.id = ama.local_id
               LEFT JOIN global_attributes ga
                      ON ama.global_id = ga.id
-                  WHERE lf.source_id = %s;'''
+                  WHERE lf.source_id = %s'''
         cur.execute(cmd, (source_id,))
-        
+
         for rec in cur.fetchall():
             fid, fname, gid, gname, who = rec
             fields.setdefault(fid, {'id': fid, 'name': fname})
@@ -379,8 +397,8 @@ class TamerDB:
                     'is_mapping': True, 'score': 2.0}
 
         cmd = '''SELECT lf.id, lf.local_name, nnr.match_id, ga.name, nnr.score
-                   FROM nr_ncomp_results_tbl nnr, local_fields lf,
-                        global_attributes ga
+                   FROM nr_ncomp_results_tbl nnr, global_attributes ga,
+                        local_fields lf
                   WHERE nnr.field_id = lf.id
                     AND nnr.source_id = %s
                     AND nnr.match_id = ga.id
@@ -405,36 +423,35 @@ class TamerDB:
                 fields[fid]['match'] = {'id': 0, 'name': 'Unknown', 'score': 0, 'green': f2c(0), 'red': f2c(1)}
                 fields[fid]['matches'] = list()
 
+        to_del = []
+        if only_unmapped:
+            for fid in fields:
+                if 'who_mapped' in fields[fid]['match']:
+                    to_del.append(fid)
+            for fid in to_del:
+                del fields[fid]
+
         return fields
 
     def dedup_source(self, sid):
         cur = self.conn.cursor()
-        self.rebuild_dedup_models()
-        cmd = '''TRUNCATE entity_test_group;
-                 INSERT INTO entity_test_group
-                      SELECT id FROM local_entities WHERE source_id = %s;
-                 SELECT entities_preprocess_test_group('t');
-                 SELECT entities_field_similarities_for_test_group();
-                 SELECT entities_results_for_test_group('f');'''
-        #cmd = '''SELECT self_join(0.00001);
-        #         --SELECT cluster(0.95);
-        #         --SELECT two_way_join(0.00001);
-        #         --SELECT incr_cluster(0.95);'''
-        cur.execute(cmd, (sid,))
+        cmd = '''select cat_entity_source(%s);
+                 select add_source(%s);'''
+        cur.execute(cmd, (sid, sid,))
         self.conn.commit()
 
 
     def dedup_all(self):
         cur = self.conn.cursor()
-        self.rebuild_dedup_models()
-        cmd = '''TRUNCATE entity_test_group;
-                 INSERT INTO entity_test_group
-                      SELECT id FROM local_entities;
-                 SELECT entities_preprocess_test_group('t');
-                 SELECT entities_field_similarities_for_test_group();
-                 SELECT entities_results_for_test_group('f');'''
-        cur.execute(cmd)
-        self.conn.commit()
+        # self.rebuild_dedup_models()
+        # cmd = '''TRUNCATE entity_test_group;
+        #          INSERT INTO entity_test_group
+        #               SELECT id FROM local_entities;
+        #          SELECT entities_preprocess_test_group('t');
+        #          SELECT entities_field_similarities_for_test_group();
+        #          SELECT entities_results_for_test_group('f');'''
+        # cur.execute(cmd)
+        # self.conn.commit()
 
     # get two entites to compare
     def get_entities_to_compare(self, approx_sim, sort):
@@ -489,4 +506,32 @@ class TamerDB:
             cmd = '''INSERT INTO entity_matches SELECT %s, %s;'''
             cur.execute(cmd, (e1id, e2id))
         self.conn.commit()
+
+    def sourcename(self, source_id):
+            cur = self.conn.cursor()
+            cmd = 'SELECT local_id FROM local_sources WHERE id = %s'
+            cur.execute(cmd, (source_id,))
+            self.conn.commit()
+            return cur.fetchone()[0]
+
+    def get_cluster_data(self, source_id):
+        cur = self.conn.cursor()
+        cmd = ''' select entity_id, cluster_id from entity_clustering
+                  where cluster_id in
+                    (select cluster_id from entity_clustering
+                     where entity_id in
+                      (select id from local_entities where source_id = %s)); '''
+        cur.execute(cmd, (source_id,))
+        data = {"name": "%s" % self.sourcename(source_id)}
+        lookup = {}
+        self.conn.commit()
+        for rec in cur.fetchall():
+            entity_id, cluster_id = rec
+            res = lookup.setdefault(cluster_id, [])
+            res.append({'name': entity_id, 'size': 1000 + random.randint(0, 1000)})
+        children = []
+        for id in lookup:
+            children.append({'name': '%s' % id, 'children': lookup[id]})
+        data['children'] = children
+        return data
 
