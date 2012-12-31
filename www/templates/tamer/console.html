@@ -24,51 +24,46 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 {% block styles %}
 {{ block.super }}
-<style>
-.tamer-console-head {
-	padding: 1em;
-	text-align: right;
-	font-weight:bold;
-	color: white;
-	background-color: black;
-}
-.tamer-console-nav ol {
-    list-style-type: none;
-}
-.tamer-console-nav li {
-    
-}
-</style>
 {% endblock styles %}
 
 
-{% block layout-top %}
-<div class="tamer-console-head">Data Tamer</div>
-{% endblock layout-top %}
-
-
 {% block layout-left %}
-<div style="font-size:16pt;"></div>
-<div class="tamer-console-nav">
-  {% for item in navitems %}
-  <h3 style="padding: 0.5em 2em 0.5em 2em;">{{ item.title }}</h3>
-  <ol class="{{ item.class }}">
-    {% for subitem in item.subitems %}
-    <li><a href="{{ subitem.target }}" name="{{ subitem.redirect }}">{{ subitem.content }}</a></li>
-    {% endfor %}
-  </ol>
-  {% endfor %}
+<div class="tamer-nav-container" id="sidenav-container">
+    <div class="tamer-console-nav" id="tamer-nav">
+        {% for item in navitems %}
+        <div class="accordion-group">
+            <div class="accordion-heading">
+                <a class="accordion-toggle" data-toggle="collapse" data-parent="#tamer-nav" href="#{{item.id}}">
+                    {{item.title}}
+                </a>
+            </div>
+            <div id="{{item.id}}" class="accordion-body collapse">
+                <div class="accordion-inner">
+                    <ol class="{{ item.class }}">
+                        {% for subitem in item.subitems %}
+                        <li><a href="{{ subitem.target }}" name="{{ subitem.redirect }}">{{ subitem.content }}</a></li>
+                        {% endfor %}
+                    </ol>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
 {% endblock layout-left %}
 
-
-{% block layout-right %}
-
-{% endblock layout-right %}
-
+{% block layout-right %}{% endblock layout-right %}
 
 {% block layout-bottom %}{% endblock layout-bottom %}
 
-
 {% block jquery %}
 {{ block.super }}
+
+<!--<script type="text/javascript">
+    $('#sidenav-container').affix({
+        offset: {
+            top: 0, bottom: 270
+        }
+    });
+</script>-->
 {% endblock jquery %}

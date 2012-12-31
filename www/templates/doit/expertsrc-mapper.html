@@ -27,6 +27,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 {% block styles %}
 {% endblock styles %}
 
+{% block navbar %}
+<a id="backlink" class="hide" href="{{expertsrc_url}}">Data Tamer</a>
+{% endblock navbar %}
 
 {% block content %}
 <input id="page-data"
@@ -136,9 +139,11 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
                             <span class="dropdown per-row-actions">
                                 <a id="choice-drop-{{attr.id}}" class="drop dropdown-toggle btn-tooltip" role="button" data-toggle="dropdown" data-target="#" title="Select a different global attribute"><small>+ more matches</small></a>
                                 <div class="dropdown-menu map-list-cont"  aria-labeledby="choice-drop-{{attr.id}}" role="menu">
-                                    <div class="filter" style="margin:5px;"><input type="text" placeholder="Filter..."></input></div>
-                                        <ul class="map-list"></ul>
+                                    <div class="filter" style="margin:5px;">
+                                        <input type="text" placeholder="Filter..."></input>
                                     </div>
+                                    <ul class="map-list"></ul>
+                                </div>
                             </span>
                         </div>
                     </div>
@@ -221,7 +226,6 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 {% block jquery %}
     <script type="text/javascript" src="{{ STATIC_URL }}js/jquery.cookie.js"></script>
-    <script type="text/javascript" src="{{ STATIC_URL }}js/bootstrap.min.js"></script>
     <script type="text/javascript" src="{{ STATIC_URL }}js/expertsrc-mapper.js"></script>
 {% endblock jquery %}
 

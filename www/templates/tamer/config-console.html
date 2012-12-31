@@ -28,34 +28,28 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 </style>
 {% endblock styles %}
 
-
-{% block layout-top %}
-<div class="tamer-console-head">Data Tamer</div>
-{% endblock layout-top %}
-
-
 {% block layout-right %}
-<form action='set' method='GET'>
-  <fieldset>
-    <legend>Configuration Properties for {{ mod_name  }}</legend>
-    {% if params %}
-    <table>
-      <tr>
-        <th>Property Name</th>
-        <th>Value</th>
-      </tr>
-      {% for p in params %}
-      <tr>
-        <td><label>{{ p.description }}</label></td>
-        <td>
-          <input type="text" name="{{ p.name }}" value="{{ p.value }}"></input>
-        </td>
-      </tr>
-      {% endfor %}
-    </table>
-    {% endif %}
-    <input type="submit" value="Save"></input>
-  </fieldset>
+<form action="set" method="GET">
+    <fieldset>
+        <legend>Configuration Properties for {{ mod_name  }}</legend>
+        {% if params %}
+        <table class="table">
+            <tr>
+                <th>Property Name</th>
+                <th>Value</th>
+            </tr>
+            {% for p in params %}
+            <tr>
+                <td><label>{{ p.description }}</label></td>
+                <td>
+                    <input type="text" name="{{ p.name }}" value="{{ p.value }}"></input>
+                </td>
+             </tr>
+            {% endfor %}
+        </table>
+        {% endif %}
+        <input type="submit" class="btn" value="Save"></input>
+    </fieldset>
 </form>
 {% endblock layout-right %}
 
@@ -65,9 +59,9 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 {% block jquery %}
 {{ block.super }}
 <script type="text/javascript">
-var $form = $('form');
-$form.submit(function (e) {
-    e.preventDefault();
+    var $form = $('form');
+    $form.submit(function (e) {
+        e.preventDefault();
     var $this = $(this),
         url = location.pathname + '/set',
         data = $this.serialize(),

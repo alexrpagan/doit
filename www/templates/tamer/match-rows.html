@@ -1,0 +1,15 @@
+<table class="results">
+    <tbody>
+        {% for attr in attr_list %}
+        <tr>
+            <td>{{ attr.name }}</td>
+            <td>
+                <div class="color-box" style="background-color:#{{ attr.match.red }}{{ attr.match.green }}44;">
+                    <b>{{ attr.match.score|floatformat }}</b>
+                </div>
+            </td>
+            <td>{{ attr.match.name }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

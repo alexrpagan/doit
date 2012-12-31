@@ -22,7 +22,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 {% block navlinks %}
     <ul class="nav nav-tabs">
         <li class="{% block navlink-summary %}{% endblock navlink-summary %}">
-            <a href="{% url doit:detail_summary db fid %}" onclick="fill_popover(this.href, 600); return false;">Summary</a>
+            <a href="#" onclick="fill_popover('{% url doit:detail_summary db fid %}', 600); return false;">Summary</a>
         </li>
 
         <!--
@@ -33,7 +33,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         -->
 
         <li class="{% block navlink-values %}{% endblock navlink-values %}">
-            <a href="{% url doit:detail_examples db fid %}" onclick="fill_popover(this.href, 800); return false;">Compare Data Values</a>
+            <a href="#" onclick="fill_popover('{% url doit:detail_examples db fid %}', 800); return false;">Compare Data Values</a>
         </li>
     </ul>
 {% endblock navlinks %}

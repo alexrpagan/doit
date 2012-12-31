@@ -1,0 +1,210 @@
+{% extends "tamer/console.html" %}
+
+{% comment %}
+Copyright (c) 2011 Massachusetts Institute of Technology
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+{% endcomment %}
+
+
+{% block styles %}
+{{ block.super }}
+<style>
+    .matches {
+        overflow: scroll;
+        max-height: 800px;
+    }
+    .color-box {
+        margin-right:15px;
+        margin-left:20px;
+        padding:5px 7px;
+        height: 30px;
+        width: 30px;
+        background: #00FF44;
+        -moz-border-radius: 5px;
+        border-radius: 5px;
+    }
+    .thresh-select select {
+        margin-left:10px;
+        margin-top:5px;
+        width: 70px;
+    }
+    .status {
+        margin: 5px 10px;
+    }
+    .small-container {
+        max-width: 800px;
+    }
+    .matches-container {
+        padding:20px 30px;
+    }
+    .results {
+        width: 100%;
+    }
+    .results td {
+        width: 33%;
+    }
+    .results-head hr {
+        width: 33%;
+    }
+    .send-to-crowd-container {
+        margin-top: 40px;
+    }
+
+</style>
+{% endblock styles %}
+
+
+{% block layout-top %}
+{% endblock layout-top %}
+
+
+{% block layout-right %}
+<div>
+    <div class="header">
+        <h3>{{source_id}}</h3>
+    </div>
+    <hr>
+    <div class="small-container">
+        <div class="row">
+
+            <div class="status-container">
+                <div class="status pull-left hide">
+                    <p class="lead">Loading matches...</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="matches-container hide">
+
+            <div class="row">
+                <table class="table results-head">
+                    <thead>
+                        <tr>
+                            <th>Local Attribute</th>
+                            <th>Match Strength</th>
+                            <th>Suggested Global Match</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+
+            <div class="row">
+                <div class="matches">
+                </div>
+            </div>
+
+            <div class="row send-to-crowd-container">
+                <span class="send-to-crowd btn btn-large btn-primary pull-left">Send questions to crowd market</span>
+                <div class="thresh-container hide">
+                    <div class="color-box thresh-color-box pull-right">
+                    </div>
+                    <div class="thresh-select pull-right">
+                        <label>
+                            <span class="lead">Acceptance threshhold:</span>
+                            <select>
+                                {% for point in threshhold_increments %}
+                                <option data-red="{{point.red}}" data-green="{{point.green}}">{{point.val}}</option>
+                                {% endfor %}
+                            </select>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+
+
+    </div>
+
+</div>
+{% endblock layout-right %}
+
+{% block layout-bottom %}{% endblock layout-bottom %}
+
+
+{% block jquery %}
+<script type="text/javascript">
+{% if source_id %}
+var sid = '{{source_id}}';
+{% endif %}
+
+var run_url = '{% url tamer:schema_map_source_run dbname sid %}';
+var schedule_url = '{% url tamer:schema_map_source_schedule dbname sid %}';
+var redirect_url = '{{ redirect_url }}';
+
+var thresh = 0.0;
+
+$(function(){
+    var update_threshhold = function (val, red, green) {
+        thresh = parseFloat(val);
+        $('.thresh-color-box')
+            .css('background', '#' + red + green + '44');
+    }
+
+    var reveal_mapping_view = function () {
+        $('.status').hide();
+        $('.thresh-container').show();
+        $('.matches-container').show();
+    }
+
+    $('.send-to-crowd').click(function() {
+        $('.status').text('Registering questions in crowd market...');
+        $('.status').show();
+        $.ajax({
+            url: schedule_url,
+            success: function(data){
+                $('.status').hide();
+                window.location = redirect_url;
+            },
+            data: {
+                thresh : thresh
+            },
+            type: 'POST',
+            dataType: 'json',
+            cache: false
+        });
+    });
+
+    $('select').change(function() {
+        $('select option:selected').each(function() {
+            update_threshhold($(this).text(), $(this).data('red'), $(this).data('green'));
+        });
+    })
+    .trigger('change');
+
+    $('.status').show();
+
+    $.ajax({
+        url: run_url,
+        success: function(data){
+            $('.matches:first').html(data);
+            reveal_mapping_view();
+        },
+        type: 'GET',
+        dataType: 'html',
+        cache: true
+    });
+});
+
+</script>
+
+
+{{ block.super }}
+{% endblock jquery %}

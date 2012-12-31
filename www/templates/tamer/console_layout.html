@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "expertsrc-base.html" %}
 
 {% comment %}
 Copyright (c) 2011 Massachusetts Institute of Technology
@@ -24,36 +24,27 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 {% block title %}Data Tamer{% endblock %}
 
 {% block content %}
-<style>
-.tamer-layout-top {
-	width: 100%;
-}
-.tamer-layout-mid {
-	width: 100%;
-}
-.tamer-layout-left {
-	width: 300px;
-	background-color: #EDEDED;
-}
-.tamer-layout-right {
-    padding: 1em;
-}
-</style>
+<link rel="stylesheet" href="{{STATIC_URL}}styles/tamer.css"></link>
+
 <div class="tamer-layout-top">
-  {% block layout-top %}{% endblock layout-top %}
+    {% block layout-top %}{% endblock layout-top %}
 </div>
-<table class="tamer-layout-mid">
-  <tr>
-    <td class="tamer-layout-left">
-      {% block layout-left %}{% endblock %}
-    </td>
-    <td class="tamer-layout-right">
-      {% block layout-right %}{% endblock layout-right %}
-    </td>
-  </tr>
-</table>
+
+<div class="tamer-layout-mid">
+    <div class="row-fluid">
+        <div class="tamer-layout-left span4">
+            <td class="tamer-layout-left">
+                {% block layout-left %}{% endblock %}
+            </td>
+        </div>
+        <div class="tamer-layout-right span8">
+            {% block layout-right %}{% endblock layout-right %}
+        </div>
+    </div>
+</div>
+
 <div class="tamer-layout-bottom">
-  {% block layout-bottom %}{% endblock layout-bottom %}
+    {% block layout-bottom %}{% endblock layout-bottom %}
 </div>
 {% endblock content %}
 
