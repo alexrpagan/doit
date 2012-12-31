@@ -64,10 +64,8 @@ body {margin:0;padding:0;}
 
 .pane {
     padding:10px;
-//    overflow:auto;
-//    background-color:#EFEFEF;
-//    border:1px solid #BBBBBB;
 }
+
 .pane.top {
     position:relative;
     clear:both;
@@ -76,7 +74,7 @@ body {margin:0;padding:0;}
     font-size:12pt;
     border-bottom:2px solid #BBB;
 }
-.pane.left {position:relative; float:left;width:400px;height:100%;border-right:2px solid #BBB; overflow:auto;}
+.pane.left {position:relative; float:left;width:300px;height:100%;border-right:2px solid #BBB; overflow:auto;}
 .pane.right {padding:0px;margin-top:0px;overflow:auto;}
 
 .data-nav {
@@ -168,7 +166,7 @@ body {margin:0;padding:0;}
 .help-inner .main-copy {
     text-align: left;
     margin: 0 auto;
-    margin-top: 10px; 
+    margin-top: 10px;
     width: 75%;
 }
 
@@ -195,7 +193,7 @@ body {margin:0;padding:0;}
 .mapper .attr {width:100px;}
 .mapper td.match {width:100px;}
 .mapper td.match .choice {
-}  
+}
 
 
 .score-color {
@@ -215,9 +213,9 @@ body {margin:0;padding:0;}
 .mapper .map-list-container.open {display:block;position:absolute;}
 .mapper .map-list-container .filter {padding:2px;}
 .mapper .map-list-container .filter input {padding:2px;color:#606060;border-radius:4px;}
-.mapper ul.map-list {margin:0;padding:0;max-height:217px;overflow-x:hidden;overflow-y:scroll;} 
-.mapper ul.map-list li.candidate {padding:4px;padding-top:10px;overflow:auto;cursor:pointer;list-style:none;border-left:2em solid #627AAD;border-bottom:1px solid white;} 
-.mapper ul.map-list li.candidate:hover {background-color:#D6F6F6;} 
+.mapper ul.map-list {margin:0;padding:0;max-height:217px;overflow-x:hidden;overflow-y:scroll;}
+.mapper ul.map-list li.candidate {padding:4px;padding-top:10px;overflow:auto;cursor:pointer;list-style:none;border-left:2em solid #627AAD;border-bottom:1px solid white;}
+.mapper ul.map-list li.candidate:hover {background-color:#D6F6F6;}
 .mapper .suggest {padding:10px;cursor:pointer;border-left:2em solid #C0C0C0;}
 .mapper .suggest:hover {background-color:#D6F6F6;}
 
