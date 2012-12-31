@@ -1,3 +1,6 @@
+// functions to export to global scope
+var fill_popover;
+
 $(function() {
 
     function quote(str) {
@@ -5,7 +8,7 @@ $(function() {
     }
 
     if(!url_prefix){
-        url_prefix = ''
+        url_prefix = '';
     }
 
     var rPath = new RegExp("^" + quote(url_prefix) + "\\/doit\\/\\w+\\/");
@@ -209,6 +212,7 @@ $(function() {
             meta.hide();
             table.hide();
             mapper.show();
+            setMapperDimensions();
             toggle_display.each(function(){$(this).removeClass('btn-primary');});
             toggle_display.text('See Loaded Source');
         }
@@ -428,10 +432,10 @@ $(function() {
                             .find('.msg-text')
                         .text('Loading more questions...');
                         setTimeout(function () {
-                        $(msg).hide('fade');
-                        // TODO: push items out of the queue before doing this...
-                        // TODO add domain id to this crap
-                        window.location = expertsrc_url + '/answer/' + domain_id + '/next_question';
+                            $(msg).hide('fade');
+                            // TODO: push items out of the queue before doing this...
+                            // TODO add domain id to this crap
+                            window.location = expertsrc_url + '/answer/' + domain_id + '/next_question';
                         }, 1500);
                     } else {
                         $(msg)
@@ -488,7 +492,7 @@ $(function() {
     $(detail_buttons).each( function () {
         var fid = $(this).closest('tr').attr('id').slice(3);
         $(this).click( function () {
-        fill_popover(basePath + 'fields/' + fid + '/summary', 600);
+            _fill_popover(basePath + 'fields/' + fid + '/summary', 600);
         });
     });
 
@@ -502,7 +506,7 @@ $(function() {
         $('#detailModal').modal('hide');
     }
 
-    function fill_popover (url, width, callback) {
+    function _fill_popover (url, width, callback) {
         //close_popover();
         width = width || 600;
         callback = typeof callback === 'function' ? callback : function () {};
@@ -515,6 +519,10 @@ $(function() {
         });
         return $(pop);
     }
+
+    // inject into global scope...
+    // TODO: instead of doing this, create a class that exists in global scope
+    fill_popover = _fill_popover;
 
     /* tooltips */
 

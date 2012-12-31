@@ -5,7 +5,7 @@ $(function() {
     }
 
     if(!url_prefix){
-        url_prefix = ''
+        url_prefix = '';
     }
 
     var rPath = new RegExp("^" + quote(url_prefix) + "\\/tamer\\/\\w+\\/");
@@ -16,32 +16,15 @@ $(function() {
     var $nav = $('.tamer-console-nav'),
         $new = $nav.find('.new');
 
-    $nav.accordion({
-        autoHeight: false,
-        collapsible: true
+    $("#tamer-nav").collapse({
+        toggle: false
     });
 
-    $new.find('a')
-        .first().click(function (e) {
-        }).end()
-        .last().click(function (e) {
-        });
-
-    var $navLinks = $nav.find('a');
-
-    $nav.find('a[name="redirect"]').each(function () {
-        var $this = $(this);
-        $this.click(function (e) {
-            e.preventDefault();
-            var url = $this.attr('href'),
-                data = {},
-                callback = function (json) {
-                    location.href = json.redirect;
-                };
-                $.post(url, data, callback);
-        });
-    });
-
+//    $new.find('a')
+//        .first().click(function (e) {
+//        }).end()
+//        .last().click(function (e) {
+//        });
 
     /* Table import form */
     var $importForm = $('.tamer-import-form'),
