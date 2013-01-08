@@ -114,7 +114,7 @@ circle.child {
 
     <div class="pull-right controls hide">
       <select class="limits">
-        <option>Select score threshold</option>
+        <option id="blank">Select score threshold</option>
         {% for limit in limits %}
         <option>{{limit}}</option>
         {% endfor %}
@@ -142,6 +142,7 @@ var console_size = 500;
 
 var text_collapse_size = 30;
 var show_lines = false;
+var selected = false;
 
 var w = console_size,
     h = console_size,
@@ -178,6 +179,7 @@ function refresh_edges() {
   $('line').each(function(i,v){
     $(v).css('opacity', 1);
     $(v).css('stroke-width', 1);
+    $(v).data('selected', '');
   });
 }
 
@@ -187,9 +189,10 @@ function thresh_highlight(t) {
     if ($(v).data('prob') < t) {
       wd = 2;
       op = 1;
-      $(v).data('selected', 'selected')
+      $(v).data('selected', 'selected');
     } else {
       op = 0;
+      $(v).data('selected', '');
     }
     $(v).css('stroke-width', wd);
     $(v).css('opacity', op);
@@ -216,15 +219,15 @@ d3.json(cluster_data_url, function(data) {
           return zoom(node == d ? root : d);
         } else {
           if(show_lines){
-            refresh_edges();
-            $('line').each(function (i, v) {
-              if ($(v).data('e1') != d.id && $(v).data('e2') != d.id){
-                $(v).css('opacity', .1)
-              } else {
-                $(v).css('opacity', 1)
-                $(v).css('stroke-width', 3)
-              }
-            });
+              refresh_edges();
+              $('line').each(function (i, v) {
+                if ($(v).data('e1') != d.id && $(v).data('e2') != d.id){
+                  $(v).css('opacity', .1)
+                } else {
+                  $(v).css('opacity', 1)
+                  $(v).css('stroke-width', 3)
+                }
+              });
           }
           $('#entity-data-cont').show();
           fill_entity_data(d.id);
@@ -289,11 +292,6 @@ function zoom(d, i) {
         .attr("y1", function(d) { return $('#' + d.e1).attr('cy') })
         .attr("x2", function(d) { return $('#' + d.e2).attr('cx') })
         .attr("y2", function(d) { return $('#' + d.e2).attr('cy') })
-        .style("stroke-width", function(d) {
-          return 1;
-        })
-        .style("opacity", 1);
-
     if (show_lines){
       $('line').show();
     }
@@ -318,6 +316,7 @@ function zoom(d, i) {
 
 $('input[type="checkbox"][name="edges"]').change(function() {
      if(this.checked) {
+       $('#blank').attr('selected', 'selected');
         $('line').show();
         $('.controls').show();
         show_lines = true;
@@ -326,13 +325,14 @@ $('input[type="checkbox"][name="edges"]').change(function() {
         $('.controls').hide();
         show_lines = false;
      }
-    refresh_edges();
+     refresh_edges();
  });
 
 $("select").change(function () {
   refresh_edges();
   $("select option:selected").each(function () {
     thresh_highlight($(this).text());
+    selected = true;
   });
 })
 .change();
