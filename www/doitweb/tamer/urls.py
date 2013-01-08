@@ -16,6 +16,9 @@ urlpatterns = patterns('tamer.views',
     url(r'^(?P<dbname>\w+)/source-(?P<sid>\d+)-map/schedule$', 'schema_map_source_schedule', name='schema_map_source_schedule'),
     url(r'^(?P<dbname>\w+)/source-(?P<sid>\d+)-dedup$', 'dedup_source', name='dedup_source'),
     url(r'^(?P<dbname>\w+)/source-(?P<sid>\d+)-dedup/clusters$', 'dedup_source_clusters', name='dedup_source_clusters'),
+    url(r'^(?P<dbname>\w+)/source-(?P<sid>\d+)-dedup/sim-pairs$', 'dedup_sim_pairs', name='dedup_sim_pairs'),
+    url(r'^(?P<dbname>\w+)/entity-data$', 'get_entity_data', name='get_entity_data'),
+
     url(r'^(?P<dbname>\w+)/source-(?P<sid>\d+)$', 'source_console', name='source_console'),
     url(r'^(?P<dbname>\w+)/source-(?P<sid>\d+)-(?P<tab>\w+)$', 'source_console', name='source_console'),
 

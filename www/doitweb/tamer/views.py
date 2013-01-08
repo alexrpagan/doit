@@ -355,9 +355,10 @@ def dedup_source(req, dbname, sid):
     db = TamerDB(dbname)
     # db.dedup_source(sid)
     c = {
-        'source_id': db.sourcename(sid),
+        'source_name': db.sourcename(sid),
         'dbname': dbname,
         'source_id': sid,
+        'limits': [.1 * x for x in range(11)[5:]],
         'navitems': nav_items(db), }
     return render(req, 'tamer/dedup-console.html', c)
 
@@ -368,3 +369,17 @@ def dedup_source_clusters(req, dbname, sid):
     return HttpResponse(simplejson.dumps(data),
                         mimetype='application/json')
 
+
+def get_entity_data(req, dbname):
+    db = TamerDB(dbname)
+    entity_id = req.GET['entity_id']
+    data = db.get_entity_data(entity_id)
+    c = {'data': data}
+    return render(req, 'tamer/entity-data.html', c)
+
+
+def dedup_sim_pairs(req, dbname, sid):
+    db = TamerDB(dbname)
+    data = db.get_simpairs(sid)
+    return HttpResponse(simplejson.dumps(data),
+                        mimetype='application/json')

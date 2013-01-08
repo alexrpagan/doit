@@ -25,6 +25,15 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 {% block styles %}
 {{ block.super }}
 <style>
+
+line {
+  pointer-events: all;
+}
+
+line:hover {
+  stroke-width: 4px;
+}
+
 text {
   font-size: 11px;
   pointer-events: none;
@@ -52,9 +61,18 @@ circle.parent:hover {
 }
 
 circle.child {
-  pointer-events: none;
 }
 
+.sidebar {
+  padding-left:10px;
+  width:250px;
+  height:500px;
+  overflow:scroll;
+}
+
+.limits {
+  margin-top:10px;
+}
 
 </style>
 {% endblock styles %}
@@ -65,10 +83,46 @@ circle.child {
 
 
 {% block layout-right %}
-    <h2>
-        Clusters
-    </h2>
-<div id="viz"></div>
+  <h2>
+    Entity Clusters
+  </h2>
+  <div class="row">
+    <div id="viz" class="pull-left">
+
+    </div>
+    <div class="sidebar pull-left">
+      <div id="source-data-cont">
+        <h4>Source Data</h4>
+        <dl>
+          <dt>Name</dt>
+          <dd>{{ source_name }}</dd>
+        </dl>
+      </div>
+      <div id="entity-data-cont" class="hide">
+        <h4>Entity Data</h4>
+        <div id="entity-data"></div>
+      </div>
+    </div>
+
+  </div>
+  <div class="row">
+    <div class="pull-left">
+      <label class="checkbox">
+        <input type="checkbox" name="edges"> Show similarity edges
+      </label>
+    </div>
+
+    <div class="pull-right controls hide">
+      <select class="limits">
+        <option>Select score threshold</option>
+        {% for limit in limits %}
+        <option>{{limit}}</option>
+        {% endfor %}
+      </select>
+      <button class="btn btn-primary">Send to Crowd</button>
+    </div>
+  </div>
+
 
 {% endblock layout-right %}
 
@@ -81,10 +135,17 @@ circle.child {
 <script type="text/javascript">
 
 var cluster_data_url = '{% url tamer:dedup_source_clusters dbname source_id %}';
+var entity_data_url = '{% url tamer:get_entity_data dbname %}';
+var sim_pair_url = '{% url tamer:dedup_sim_pairs dbname source_id %}'
 
-var w = 800,
-    h = 800,
-    r = 720,
+var console_size = 500;
+
+var text_collapse_size = 30;
+var show_lines = false;
+
+var w = console_size,
+    h = console_size,
+    r = console_size,
     x = d3.scale.linear().range([0, r]),
     y = d3.scale.linear().range([0, r]),
     node,
@@ -100,6 +161,42 @@ var vis = d3.select("#viz").insert("svg:svg", "h2")
     .append("svg:g")
     .attr("transform", "translate(" + (w - r) / 2 + "," + (h - r) / 2 + ")");
 
+function fill_entity_data(id){
+  $.get(
+    entity_data_url,
+    {
+      entity_id : id
+    },
+    function (d){
+      $('#entity-data').html(d)
+    },
+    "html"
+  );
+}
+
+function refresh_edges() {
+  $('line').each(function(i,v){
+    $(v).css('opacity', 1);
+    $(v).css('stroke-width', 1);
+  });
+}
+
+function thresh_highlight(t) {
+  var wd = 1, op = 1;
+  $('line').each(function(i,v){
+    if ($(v).data('prob') < t) {
+      wd = 2;
+      op = 1;
+      $(v).data('selected', 'selected')
+    } else {
+      op = 0;
+    }
+    $(v).css('stroke-width', wd);
+    $(v).css('opacity', op);
+
+  });
+}
+
 d3.json(cluster_data_url, function(data) {
   node = root = data;
 
@@ -112,7 +209,27 @@ d3.json(cluster_data_url, function(data) {
       .attr("cx", function(d) { return d.x; })
       .attr("cy", function(d) { return d.y; })
       .attr("r", function(d) { return d.r; })
-      .on("click", function(d) { return zoom(node == d ? root : d); });
+      .attr("id", function(d) { return d.id; })
+      .on("click", function(d) {
+        if(d.children) {
+          $('#entity-data-cont').hide();
+          return zoom(node == d ? root : d);
+        } else {
+          if(show_lines){
+            refresh_edges();
+            $('line').each(function (i, v) {
+              if ($(v).data('e1') != d.id && $(v).data('e2') != d.id){
+                $(v).css('opacity', .1)
+              } else {
+                $(v).css('opacity', 1)
+                $(v).css('stroke-width', 3)
+              }
+            });
+          }
+          $('#entity-data-cont').show();
+          fill_entity_data(d.id);
+        }
+      });
 
   vis.selectAll("text")
       .data(nodes)
@@ -122,10 +239,38 @@ d3.json(cluster_data_url, function(data) {
       .attr("y", function(d) { return d.y; })
       .attr("dy", ".35em")
       .attr("text-anchor", "middle")
-      .style("opacity", function(d) { return d.r > 20 ? 1 : 0; })
-      .text(function(d) { return d.name; });
+      .style("opacity", function(d) {
+          return 0;
+      })
+      .text(function(d) {
+        return d.name;
+      });
+});
 
-  d3.select(window).on("click", function() { zoom(root); });
+d3.json(sim_pair_url, function(data){
+  vis.selectAll("line")
+      .data(data)
+      .enter().append("svg:line")
+      .attr("x1", function(d) { return $('#' + d.e1).attr('cx') })
+      .attr("y1", function(d) { return $('#' + d.e1).attr('cy') })
+      .attr("x2", function(d) { return $('#' + d.e2).attr('cx') })
+      .attr("y2", function(d) { return $('#' + d.e2).attr('cy') })
+      .style("stroke", function(d) {
+        return "rgb("+ Math.floor(255 * (1 - d.prob)) + "," + Math.floor(255 * d.prob) + ",0)";
+      })
+      .style("stroke-width", function(d) {
+        return 1;
+      })
+      .attr("data-e1", function(d) {
+        return d.e1;
+      })
+      .attr("data-e2", function(d) {
+        return d.e2;
+      })
+      .attr("data-prob", function(d) {
+        return d.prob;
+      })
+      .style("display", "none");
 });
 
 function zoom(d, i) {
@@ -134,7 +279,26 @@ function zoom(d, i) {
   y.domain([d.y - d.r, d.y + d.r]);
 
   var t = vis.transition()
-      .duration(d3.event.altKey ? 7500 : 750);
+      .duration(750);
+
+  $('line').hide();
+
+  setTimeout(function() {
+    vis.selectAll("line")
+        .attr("x1", function(d) { return $('#' + d.e1).attr('cx') })
+        .attr("y1", function(d) { return $('#' + d.e1).attr('cy') })
+        .attr("x2", function(d) { return $('#' + d.e2).attr('cx') })
+        .attr("y2", function(d) { return $('#' + d.e2).attr('cy') })
+        .style("stroke-width", function(d) {
+          return 1;
+        })
+        .style("opacity", 1);
+
+    if (show_lines){
+      $('line').show();
+    }
+  }, 800)
+
 
   t.selectAll("circle")
       .attr("cx", function(d) { return x(d.x); })
@@ -144,11 +308,34 @@ function zoom(d, i) {
   t.selectAll("text")
       .attr("x", function(d) { return x(d.x); })
       .attr("y", function(d) { return y(d.y); })
-      .style("opacity", function(d) { return k * d.r > 20 ? 1 : 0; });
+      .style("opacity", function(f) {
+           return d == root ? 0 : 1;
+      });
 
   node = d;
   d3.event.stopPropagation();
 }
+
+$('input[type="checkbox"][name="edges"]').change(function() {
+     if(this.checked) {
+        $('line').show();
+        $('.controls').show();
+        show_lines = true;
+     } else {
+        $('line').hide();
+        $('.controls').hide();
+        show_lines = false;
+     }
+    refresh_edges();
+ });
+
+$("select").change(function () {
+  refresh_edges();
+  $("select option:selected").each(function () {
+    thresh_highlight($(this).text());
+  });
+})
+.change();
 
 </script>
 {% endblock jquery %}

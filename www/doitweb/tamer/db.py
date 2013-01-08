@@ -516,22 +516,66 @@ class TamerDB:
 
     def get_cluster_data(self, source_id):
         cur = self.conn.cursor()
-        cmd = ''' select entity_id, cluster_id from entity_clustering
-                  where cluster_id in
+        display_attr = 'TITLE'
+
+        cmd = ''' select ec.entity_id, ec.cluster_id, display.value
+                    from entity_clustering ec
+                    left join
+                    (
+                        select ld.entity_id, ld.value
+                        from local_fields lf,
+                             local_data ld,
+                             attribute_mappings ama,
+                             global_attributes ga
+                        where lf.id = ld.field_id
+                          and ama.local_id = lf.id
+                          and ama.global_id = ga.id
+                          and ga.name = %s
+                    ) display on display.entity_id = ec.entity_id
+                  where ec.cluster_id in
                     (select cluster_id from entity_clustering
                      where entity_id in
                       (select id from local_entities where source_id = %s)); '''
-        cur.execute(cmd, (source_id,))
+        cur.execute(cmd, (display_attr, source_id))
         data = {"name": "%s" % self.sourcename(source_id)}
         lookup = {}
         self.conn.commit()
         for rec in cur.fetchall():
-            entity_id, cluster_id = rec
+            entity_id, cluster_id, display_name = rec
+            if display_name is None:
+                display_name = entity_id
             res = lookup.setdefault(cluster_id, [])
-            res.append({'name': entity_id, 'size': 1000 + random.randint(0, 1000)})
+            res.append({'id': entity_id, 'name': display_name, 'size': 1000 + random.randint(0, 1000)})
         children = []
         for id in lookup:
             children.append({'name': '%s' % id, 'children': lookup[id]})
         data['children'] = children
         return data
 
+    def get_entity_data(self, entity_id):
+        cur = self.conn.cursor()
+        cmd = ''' SELECT lf.local_name, ld.value
+                  FROM local_fields lf join local_data ld on lf.id = ld.field_id
+                  WHERE ld.entity_id = %s
+                  ORDER BY lf.local_name'''
+        cur.execute(cmd, (entity_id,))
+        self.conn.commit()
+        return cur.fetchall()
+
+    def get_simpairs(self, source_id):
+        cur = self.conn.cursor()
+        cmd = ''' select sp.*, ec1.cluster_id
+                    from sim_pairs sp, entity_clustering ec1,
+                         entity_clustering ec2, local_entities le
+                    where ec1.entity_id = sp.entity1_id
+                        and ec2.entity_id = sp.entity2_id
+                        and ec2.cluster_id = ec1.cluster_id
+                        and le.source_id = %s
+                        and (sp.entity1_id = le.id or sp.entity2_id = le.id); '''
+        cur.execute(cmd, (source_id,))
+        self.conn.commit()
+        pairs = []
+        for item in cur.fetchall():
+            e1, e2, prob, cluster = item
+            pairs.append({'e1': e1, 'e2': e2, 'prob': prob, 'cluster': cluster})
+        return pairs
